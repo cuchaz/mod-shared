@@ -1,20 +1,74 @@
 package cuchaz.modsShared;
 
+import net.minecraft.block.Block;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.Icon;
+
 public enum BlockSide
 {
 	// NOTE: order is important
-	Bottom, // y-axis (+)
-	Top, //           (-)
-	East, // z-axis (+)
-	West, //        (-)
-	North, // x-axis (+)
-	South; //        (-)
+	Bottom( 0, -1, 0 ) // y-axis (-)
+	{
+		@Override
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		{
+			renderBlocks.renderFaceYNeg( block, (double)x, (double)y, (double)z, icon );
+		}
+	},
+	Top( 0, 1, 0 ) // y-axis (+)
+	{
+		@Override
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		{
+			renderBlocks.renderFaceYPos( block, (double)x, (double)y, (double)z, icon );
+		}
+	},
+	East( 0, 0, 1 ) // z-axis (+)
+	{
+		@Override
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		{
+			renderBlocks.renderFaceZPos( block, (double)x, (double)y, (double)z, icon );
+		}
+	},
+	West( 0, 0, -1 ) // z-axis (-)
+	{
+		@Override
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		{
+			renderBlocks.renderFaceZNeg( block, (double)x, (double)y, (double)z, icon );
+		}
+	},
+	North( 1, 0, 0 ) // x-axis (+)
+	{
+		@Override
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		{
+			renderBlocks.renderFaceXPos( block, (double)x, (double)y, (double)z, icon );
+		}
+	},
+	South( -1, 0, 0 ) // x-axis (-)
+	{
+		@Override
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		{
+			renderBlocks.renderFaceXNeg( block, (double)x, (double)y, (double)z, icon );
+		}
+	};
 	
 	private BlockSide m_oppositeSide;
 	private BlockSide m_xzNextSide;
+	private int m_dx;
+	private int m_dy;
+	private int m_dz;
 	
-	private BlockSide( )
+	private BlockSide( int dx, int dy, int dz )
 	{
+		m_dx = dx;
+		m_dy = dy;
+		m_dz = dz;
+		
 		m_oppositeSide = null;
 		m_xzNextSide = null;
 	}
@@ -41,6 +95,21 @@ public enum BlockSide
 		return ordinal();
 	}
 	
+	public int getDx( )
+	{
+		return m_dx;
+	}
+	
+	public int getDy( )
+	{
+		return m_dy;
+	}
+	
+	public int getDz( )
+	{
+		return m_dz;
+	}
+	
 	public BlockSide getOppositeSide( )
 	{
 		return m_oppositeSide;
@@ -65,4 +134,6 @@ public enum BlockSide
 		}
 		return side;
 	}
+	
+	public abstract void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon );
 }
