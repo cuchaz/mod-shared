@@ -4,7 +4,7 @@ import java.awt.Color;
 
 public class ColorUtils
 {
-	private static final int DefaultAlpha = 0;
+	private static final int DefaultAlpha = 255;
 	
 	public static int getColor( Color c )
 	{
@@ -28,9 +28,9 @@ public class ColorUtils
 	
 	public static int getColor( int r, int g, int b, int a )
 	{
-		return ( r & 0xff )
+		return ( b & 0xff )
 			| ( g & 0xff ) << 8
-			| ( b & 0xff ) << 16
+			| ( r & 0xff ) << 16
 			| ( a & 0xff ) << 24;
 	}
 }
