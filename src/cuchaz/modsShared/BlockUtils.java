@@ -6,13 +6,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockAccess;
 
 public class BlockUtils
 {
 	public static interface BlockValidator
 	{
-		public boolean isValid( World world, int x, int y, int z );
+		public boolean isValid( IBlockAccess world, int x, int y, int z );
 	}
 	
 	public static int getManhattanDistance( ChunkCoordinates a, ChunkCoordinates b )
@@ -55,7 +55,7 @@ public class BlockUtils
 		return Math.abs( ax - bx ) + Math.abs( az - bz );
 	}
 	
-	public static List<ChunkCoordinates> graphSearch( World world, int x, int y, int z, int maxNumBlocks, BlockValidator validator )
+	public static List<ChunkCoordinates> graphSearch( IBlockAccess world, int x, int y, int z, int maxNumBlocks, BlockValidator validator )
 	{
 		ChunkCoordinates sourceBlock = new ChunkCoordinates( x, y, z );
 		
