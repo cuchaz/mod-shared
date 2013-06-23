@@ -2,6 +2,7 @@ package cuchaz.modsShared;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Icon;
 
 public enum BlockSide
@@ -14,6 +15,36 @@ public enum BlockSide
 		{
 			renderBlocks.renderFaceYNeg( block, (double)x, (double)y, (double)z, icon );
 		}
+		
+		@Override
+		public int getWidth( int dx, int dy, int dz )
+		{
+			return dx;
+		}
+		
+		@Override
+		public int getHeight( int dx, int dy, int dz )
+		{
+			return dz;
+		}
+
+		@Override
+		public int getU( int x, int y, int z )
+		{
+			return x;
+		}
+
+		@Override
+		public int getV( int x, int y, int z )
+		{
+			return z;
+		}
+		
+		@Override
+		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		{
+			return compareWith.posY < compareTo.posY;
+		}
 	},
 	Top( 0, 1, 0 ) // y-axis (+)
 	{
@@ -21,6 +52,36 @@ public enum BlockSide
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
 		{
 			renderBlocks.renderFaceYPos( block, (double)x, (double)y, (double)z, icon );
+		}
+		
+		@Override
+		public int getWidth( int dx, int dy, int dz )
+		{
+			return dx;
+		}
+		
+		@Override
+		public int getHeight( int dx, int dy, int dz )
+		{
+			return dz;
+		}
+
+		@Override
+		public int getU( int x, int y, int z )
+		{
+			return x;
+		}
+
+		@Override
+		public int getV( int x, int y, int z )
+		{
+			return z;
+		}
+		
+		@Override
+		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		{
+			return compareWith.posY > compareTo.posY;
 		}
 	},
 	East( 0, 0, 1 ) // z-axis (+)
@@ -30,6 +91,36 @@ public enum BlockSide
 		{
 			renderBlocks.renderFaceZPos( block, (double)x, (double)y, (double)z, icon );
 		}
+		
+		@Override
+		public int getWidth( int dx, int dy, int dz )
+		{
+			return dx;
+		}
+		
+		@Override
+		public int getHeight( int dx, int dy, int dz )
+		{
+			return dy;
+		}
+
+		@Override
+		public int getU( int x, int y, int z )
+		{
+			return x;
+		}
+
+		@Override
+		public int getV( int x, int y, int z )
+		{
+			return y;
+		}
+		
+		@Override
+		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		{
+			return compareWith.posZ > compareTo.posZ;
+		}
 	},
 	West( 0, 0, -1 ) // z-axis (-)
 	{
@@ -37,6 +128,36 @@ public enum BlockSide
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
 		{
 			renderBlocks.renderFaceZNeg( block, (double)x, (double)y, (double)z, icon );
+		}
+		
+		@Override
+		public int getWidth( int dx, int dy, int dz )
+		{
+			return dx;
+		}
+		
+		@Override
+		public int getHeight( int dx, int dy, int dz )
+		{
+			return dy;
+		}
+
+		@Override
+		public int getU( int x, int y, int z )
+		{
+			return x;
+		}
+
+		@Override
+		public int getV( int x, int y, int z )
+		{
+			return y;
+		}
+		
+		@Override
+		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		{
+			return compareWith.posZ < compareTo.posZ;
 		}
 	},
 	North( 1, 0, 0 ) // x-axis (+)
@@ -46,6 +167,36 @@ public enum BlockSide
 		{
 			renderBlocks.renderFaceXPos( block, (double)x, (double)y, (double)z, icon );
 		}
+		
+		@Override
+		public int getWidth( int dx, int dy, int dz )
+		{
+			return dz;
+		}
+		
+		@Override
+		public int getHeight( int dx, int dy, int dz )
+		{
+			return dy;
+		}
+		
+		@Override
+		public int getU( int x, int y, int z )
+		{
+			return z;
+		}
+
+		@Override
+		public int getV( int x, int y, int z )
+		{
+			return y;
+		}
+		
+		@Override
+		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		{
+			return compareWith.posX > compareTo.posX;
+		}
 	},
 	South( -1, 0, 0 ) // x-axis (-)
 	{
@@ -53,6 +204,36 @@ public enum BlockSide
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
 		{
 			renderBlocks.renderFaceXNeg( block, (double)x, (double)y, (double)z, icon );
+		}
+		
+		@Override
+		public int getWidth( int dx, int dy, int dz )
+		{
+			return dz;
+		}
+		
+		@Override
+		public int getHeight( int dx, int dy, int dz )
+		{
+			return dy;
+		}
+
+		@Override
+		public int getU( int x, int y, int z )
+		{
+			return z;
+		}
+
+		@Override
+		public int getV( int x, int y, int z )
+		{
+			return y;
+		}
+		
+		@Override
+		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		{
+			return compareWith.posX < compareTo.posX;
 		}
 	};
 	
@@ -135,4 +316,9 @@ public enum BlockSide
 	}
 	
 	public abstract void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon );
+	public abstract int getWidth( int dx, int dy, int dz );
+	public abstract int getHeight( int dx, int dy, int dz );
+	public abstract int getU( int x, int y, int z );
+	public abstract int getV( int x, int y, int z );
+	public abstract boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo );
 }
