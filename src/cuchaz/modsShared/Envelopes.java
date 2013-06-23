@@ -1,7 +1,5 @@
 package cuchaz.modsShared;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -9,8 +7,7 @@ import net.minecraft.util.ChunkCoordinates;
 
 public class Envelopes
 {
-	private Map<BlockSide,List<ChunkCoordinates>> m_envelopes;
-	private Map<BlockSide,BlockArray> m_surfaces;
+	private Map<BlockSide,BlockArray> m_envelopes;
 	private BoundingBoxInt m_boundingBox;
 	
 	public Envelopes( Iterable<ChunkCoordinates> blocks )
@@ -23,7 +20,7 @@ public class Envelopes
 		}
 		
 		// init the extreme arrays
-		m_surfaces = new TreeMap<BlockSide,BlockArray>();
+		m_envelopes = new TreeMap<BlockSide,BlockArray>();
 		for( BlockSide side : BlockSide.values() )
 		{
 			BlockArray surface = new BlockArray(
@@ -39,7 +36,7 @@ public class Envelopes
 					surface.setBlock( u, v, null );
 				}
 			}
-			m_surfaces.put( side, surface );
+			m_envelopes.put( side, surface );
 		}
 		
 		// compute the envelopes
@@ -47,7 +44,7 @@ public class Envelopes
 		{
 			for( BlockSide side : BlockSide.values() )
 			{
-				BlockArray surface = m_surfaces.get( side );
+				BlockArray surface = m_envelopes.get( side );
 				int u = side.getU( coords.posX, coords.posY, coords.posZ );
 				int v = side.getV( coords.posX, coords.posY, coords.posZ );
 				ChunkCoordinates extremalCoords = surface.getBlock( u, v );
@@ -57,26 +54,6 @@ public class Envelopes
 				}
 			}
 		}
-		
-		// collect the surfaces into lists for the envelopes
-		m_envelopes = new TreeMap<BlockSide,List<ChunkCoordinates>>();
-		for( BlockSide side : BlockSide.values() )
-		{
-			List<ChunkCoordinates> envelope = new ArrayList<ChunkCoordinates>();
-			BlockArray surface = m_surfaces.get( side );
-			for( int u=surface.getUMin(); u<=surface.getUMax(); u++ )
-			{
-				for( int v=surface.getVMin(); v<=surface.getVMax(); v++ )
-				{
-					ChunkCoordinates block = surface.getBlock( u, v );
-					if( block != null )
-					{
-						envelope.add( block );
-					}
-				}
-			}
-			m_envelopes.put( side, envelope );
-		}
 	}
 	
 	public BoundingBoxInt getBoundingBox( )
@@ -84,12 +61,7 @@ public class Envelopes
 		return m_boundingBox;
 	}
 	
-	public BlockArray getSurface( BlockSide side )
-	{
-		return m_surfaces.get( side );
-	}
-	
-	public List<ChunkCoordinates> getEnvelope( BlockSide side )
+	public BlockArray getEnvelope( BlockSide side )
 	{
 		return m_envelopes.get( side );
 	}

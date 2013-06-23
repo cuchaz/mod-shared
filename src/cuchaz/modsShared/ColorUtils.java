@@ -33,4 +33,44 @@ public class ColorUtils
 			| ( r & 0xff ) << 16
 			| ( a & 0xff ) << 24;
 	}
+	
+	public static int getRed( int color )
+	{
+		return ( color >> 16 ) & 0xff;
+	}
+	
+	public static int getGreen( int color )
+	{
+		return ( color >> 8 ) & 0xff;
+	}
+	
+	public static int getBlue( int color )
+	{
+		return color & 0xff;
+	}
+	
+	public static int getAlpha( int color )
+	{
+		return ( color >> 24 ) & 0xff;
+	}
+	
+	public static float getRedf( int color )
+	{
+		return (float)getRed( color )/255.0f;
+	}
+	
+	public static float getGreenf( int color )
+	{
+		return (float)getGreen( color )/255.0f;
+	}
+	
+	public static float getBluef( int color )
+	{
+		return (float)getBlue( color )/255.0f;
+	}
+	
+	public static float getAlphaf( int color )
+	{
+		return (float)getAlpha( color )/255.0f;
+	}
 }
