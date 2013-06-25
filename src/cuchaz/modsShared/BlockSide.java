@@ -237,6 +237,8 @@ public enum BlockSide
 		}
 	};
 	
+	private static BlockSide[] m_xzSides;
+	
 	private BlockSide m_oppositeSide;
 	private BlockSide m_xzNextSide;
 	private int m_dx;
@@ -268,6 +270,8 @@ public enum BlockSide
 		West.m_xzNextSide = South;
 		South.m_xzNextSide = East;
 		East.m_xzNextSide = North;
+		
+		m_xzSides = new BlockSide[] { North, East, South, West };
 	}
 	
 	public int getId( )
@@ -321,4 +325,9 @@ public enum BlockSide
 	public abstract int getU( int x, int y, int z );
 	public abstract int getV( int x, int y, int z );
 	public abstract boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo );
+
+	public static BlockSide[] xzSides( )
+	{
+		return m_xzSides;
+	}
 }
