@@ -8,7 +8,8 @@ import net.minecraft.util.Icon;
 public enum BlockSide
 {
 	// NOTE: order is important
-	Bottom( 0, -1, 0 ) // y-axis (-)
+	// y-axis (-)
+	Bottom( 0, -1, 0, new BoxCorner[] { BoxCorner.BottomNorthEast, BoxCorner.BottomNorthWest, BoxCorner.BottomSouthWest, BoxCorner.BottomSouthEast } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
@@ -46,7 +47,8 @@ public enum BlockSide
 			return compareWith.posY < compareTo.posY;
 		}
 	},
-	Top( 0, 1, 0 ) // y-axis (+)
+	// y-axis (+)
+	Top( 0, 1, 0, new BoxCorner[] { BoxCorner.TopNorthEast, BoxCorner.TopNorthWest, BoxCorner.TopSouthWest, BoxCorner.TopSouthEast } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
@@ -84,7 +86,8 @@ public enum BlockSide
 			return compareWith.posY > compareTo.posY;
 		}
 	},
-	East( 0, 0, 1 ) // z-axis (+)
+	// z-axis (+)
+	East( 0, 0, 1, new BoxCorner[] { BoxCorner.TopNorthEast, BoxCorner.TopSouthEast, BoxCorner.BottomSouthEast, BoxCorner.BottomNorthEast } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
@@ -122,7 +125,8 @@ public enum BlockSide
 			return compareWith.posZ > compareTo.posZ;
 		}
 	},
-	West( 0, 0, -1 ) // z-axis (-)
+	// z-axis (-)
+	West( 0, 0, -1, new BoxCorner[] { BoxCorner.TopSouthWest, BoxCorner.TopNorthWest, BoxCorner.BottomNorthWest, BoxCorner.BottomSouthWest } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
@@ -160,7 +164,8 @@ public enum BlockSide
 			return compareWith.posZ < compareTo.posZ;
 		}
 	},
-	North( 1, 0, 0 ) // x-axis (+)
+	// x-axis (+)
+	North( 1, 0, 0, new BoxCorner[] { BoxCorner.TopNorthWest, BoxCorner.TopNorthEast, BoxCorner.BottomNorthEast, BoxCorner.BottomNorthWest } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
@@ -198,7 +203,8 @@ public enum BlockSide
 			return compareWith.posX > compareTo.posX;
 		}
 	},
-	South( -1, 0, 0 ) // x-axis (-)
+	// x-axis (-)
+	South( -1, 0, 0, new BoxCorner[] { BoxCorner.TopSouthEast, BoxCorner.TopSouthWest, BoxCorner.BottomSouthWest, BoxCorner.BottomSouthEast } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
@@ -244,12 +250,14 @@ public enum BlockSide
 	private int m_dx;
 	private int m_dy;
 	private int m_dz;
+	private BoxCorner[] m_corners;
 	
-	private BlockSide( int dx, int dy, int dz )
+	private BlockSide( int dx, int dy, int dz, BoxCorner[] corners )
 	{
 		m_dx = dx;
 		m_dy = dy;
 		m_dz = dz;
+		m_corners = corners;
 		
 		m_oppositeSide = null;
 		m_xzNextSide = null;
@@ -292,6 +300,11 @@ public enum BlockSide
 	public int getDz( )
 	{
 		return m_dz;
+	}
+	
+	public BoxCorner[] getCorners( )
+	{
+		return m_corners;
 	}
 	
 	public BlockSide getOppositeSide( )
