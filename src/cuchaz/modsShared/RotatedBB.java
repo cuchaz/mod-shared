@@ -8,11 +8,25 @@ public class RotatedBB
 {
 	private AxisAlignedBB m_box;
 	private float m_yaw;
+	private double m_centerX;
+	private double m_centerZ;
 	
 	public RotatedBB( AxisAlignedBB box, float yaw )
 	{
+		this(
+			box,
+			yaw,
+			( box.maxX + box.minX )/2,
+			( box.maxZ + box.minZ )/2
+		);
+	}
+	
+	public RotatedBB( AxisAlignedBB box, float yaw, double centerX, double centerZ )
+	{
 		m_box = box;
 		m_yaw = yaw;
+		m_centerX = centerX;
+		m_centerZ = centerZ;
 	}
 	
 	public double getMinY( )
@@ -42,28 +56,25 @@ public class RotatedBB
 	
 	public void getCorner( Vec3 out, BoxCorner corner )
 	{
-		getAACorner( out, corner );
-		
-		// get the centroid of the box
-		double cx = ( m_box.maxX + m_box.minX )/2;
-		double cz = ( m_box.maxZ + m_box.minZ )/2;
+		corner.getPoint( out, m_box );
 		
 		// translate so the box is centered at the origin
-		out.xCoord -= cx;
-		out.zCoord -= cz;
+		out.xCoord -= m_centerX;
+		out.zCoord -= m_centerZ;
 		
 		// rotate by the yaw
 		float yawRad = (float)Math.toRadians( m_yaw );
 		float cos = MathHelper.cos( yawRad );
 		float sin = MathHelper.sin( yawRad );
-		double x = out.xCoord*cos - out.zCoord*sin;
-		double z = out.xCoord*sin + out.zCoord*cos;
+		
+		double x = out.xCoord*cos + out.zCoord*sin;
+		double z = -out.xCoord*sin + out.zCoord*cos;
 		out.xCoord = x;
 		out.zCoord = z;
 		
-		// translate back to the box coords
-		out.xCoord += cx;
-		out.zCoord += cz;
+		// translate back to the world coords
+		out.xCoord += m_centerX;
+		out.zCoord += m_centerZ;
 	}
 	
 	public boolean containsPoint( double x, double y, double z )
@@ -74,36 +85,27 @@ public class RotatedBB
 			return false;
 		}
 		
-		// get the centroid of the box
-		double cx = ( m_box.maxX + m_box.minX )/2;
-		double cz = ( m_box.maxZ + m_box.minZ )/2;
-		
 		// translate so the box is centered at the origin
-		x -= cx;
-		z -= cz;
+		x -= m_centerX;
+		z -= m_centerZ;
 		
 		// rotate the query point into box space
 		float yawRad = (float)Math.toRadians( -m_yaw );
 		float cos = MathHelper.cos( yawRad );
 		float sin = MathHelper.sin( yawRad );
-		double newx = x*cos - z*sin;
-		double newz = x*sin + z*cos;
+		double newx = x*cos + z*sin;
+		double newz = -x*sin + z*cos;
 		x = newx;
 		z = newz;
 		
-		// translate back to the box coords
-		x += cx;
-		z += cz;
+		// translate back to the world coords
+		x += m_centerX;
+		z += m_centerZ;
 		
 		// finally, perform the check
 		return x >= m_box.minX
 			&& x <= m_box.maxX
 			&& z >= m_box.minZ
 			&& z <= m_box.maxZ;
-	}
-	
-	private void getAACorner( Vec3 out, BoxCorner corner )
-	{
-		corner.getPoint( out, m_box );
 	}
 }
