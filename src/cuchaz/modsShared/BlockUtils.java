@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.world.IBlockAccess;
 
 public class BlockUtils
 {
 	public static interface BlockValidator
 	{
-		public boolean isValid( IBlockAccess world, int x, int y, int z );
+		public boolean isValid( ChunkCoordinates coords );
+	}
+	
+	public static interface BlockConditionValidator extends BlockValidator
+	{
+		public boolean isConditionMet( ChunkCoordinates coords );
 	}
 	
 	public static int getManhattanDistance( ChunkCoordinates a, ChunkCoordinates b )
@@ -55,29 +60,26 @@ public class BlockUtils
 		return Math.abs( ax - bx ) + Math.abs( az - bz );
 	}
 	
-	public static List<ChunkCoordinates> graphSearch( IBlockAccess world, int x, int y, int z, int maxNumBlocks, BlockValidator validator )
+	public static List<ChunkCoordinates> searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockValidator validator )
 	{
-		ChunkCoordinates sourceBlock = new ChunkCoordinates( x, y, z );
-		
-		// grab all connected wood/leaf blocks with the same meta up to a few blocks away in the xz plane
-		// using BFS
-		ChunkCoordinates origin = new ChunkCoordinates( x, y, z );
+		return searchForBlocks( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator );
+	}
+	
+	public static List<ChunkCoordinates> searchForBlocks( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockValidator validator )
+	{
+		// do BFS to find valid blocks starting at the source block
 		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
+		queue.add( sourceBlock );
 		HashSet<ChunkCoordinates> visitedBlocks = new HashSet<ChunkCoordinates>();
 		List<ChunkCoordinates> foundBlocks = new ArrayList<ChunkCoordinates>();
-		queue.add( origin );
 		
+		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
 		while( !queue.isEmpty() )
 		{
 			// get the block and visit it
 			ChunkCoordinates block = queue.iterator().next();
 			queue.remove( block );
 			visitedBlocks.add( block );
-			
-			if( !validator.isValid(  world, block.posX, block.posY, block.posZ ) )
-			{
-				continue;
-			}
 			
 			// this is a target block! Add it to the list (as long as it's not the source block)
 			if( !block.equals( sourceBlock ) )
@@ -91,30 +93,76 @@ public class BlockUtils
 				foundBlocks.add( block );
 			}
 			
-			// queue up the block's neighbors
-			List<ChunkCoordinates> neighbors = new ArrayList<ChunkCoordinates>();
-			for( int dx : new int[] { -1, 1 } )
+			// check the block's neighbors
+			for( BlockSide side : BlockSide.values() )
 			{
-				neighbors.add( new ChunkCoordinates( block.posX + dx, block.posY, block.posZ ) );
-			}
-			for( int dy : new int[] { -1, 1 } )
-			{
-				neighbors.add( new ChunkCoordinates( block.posX, block.posY + dy, block.posZ ) );
-			}
-			for( int dz : new int[] { -1, 1 } )
-			{
-				neighbors.add( new ChunkCoordinates( block.posX, block.posY, block.posZ + dz ) );
-			}
-			
-			for( ChunkCoordinates neighbor : neighbors )
-			{
-				if( !visitedBlocks.contains( neighbor ) && !queue.contains( neighbor ) )
+				neighborCoords.posX = block.posX + side.getDx();
+				neighborCoords.posY = block.posY + side.getDy();
+				neighborCoords.posZ = block.posZ + side.getDz();
+				
+				if( isValidNeighbor( neighborCoords, validator, queue, visitedBlocks ) )
 				{
-					queue.add( neighbor );
+					queue.add( new ChunkCoordinates( neighborCoords ) );
 				}
 			}
 		}
 		
 		return foundBlocks;
+	}
+	
+	public static Boolean searchForCondition( int x, int y, int z, int maxNumBlocks, BlockConditionValidator validator )
+	{
+		return searchForCondition( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator );
+	}
+	
+	public static Boolean searchForCondition( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockConditionValidator validator )
+	{
+		// do BFS to find valid blocks starting at the source block
+		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
+		queue.add( sourceBlock );
+		HashSet<ChunkCoordinates> visitedBlocks = new HashSet<ChunkCoordinates>();
+		
+		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
+		while( !queue.isEmpty() )
+		{
+			// get the block and visit it
+			ChunkCoordinates block = queue.iterator().next();
+			queue.remove( block );
+			visitedBlocks.add( block );
+			
+			// check for the fail-safe
+			if( visitedBlocks.size() > maxNumBlocks )
+			{
+				return null;
+			}
+			
+			// check for the condition
+			if( validator.isConditionMet( block ) )
+			{
+				return true;
+			}
+			
+			// check the block's neighbors
+			for( BlockSide side : BlockSide.values() )
+			{
+				neighborCoords.posX = block.posX + side.getDx();
+				neighborCoords.posY = block.posY + side.getDy();
+				neighborCoords.posZ = block.posZ + side.getDz();
+				
+				if( isValidNeighbor( neighborCoords, validator, queue, visitedBlocks ) )
+				{
+					queue.add( new ChunkCoordinates( neighborCoords ) );
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	private static boolean isValidNeighbor( ChunkCoordinates coords, BlockValidator validator, Set<ChunkCoordinates> queue, Set<ChunkCoordinates> visitedBlocks )
+	{
+		return validator.isValid( coords )
+			&& !visitedBlocks.contains( coords )
+			&& !queue.contains( coords );
 	}
 }
