@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import net.minecraft.util.ChunkCoordinates;
 
@@ -164,5 +165,140 @@ public class BlockUtils
 		return validator.isValid( coords )
 			&& !visitedBlocks.contains( coords )
 			&& !queue.contains( coords );
+	}
+	
+	public static List<TreeSet<ChunkCoordinates>> getConnectedComponents( Set<ChunkCoordinates> blocks )
+	{
+		List<TreeSet<ChunkCoordinates>> components = new ArrayList<TreeSet<ChunkCoordinates>>();
+		final TreeSet<ChunkCoordinates> remainingBlocks = new TreeSet<ChunkCoordinates>( blocks );
+		while( !remainingBlocks.isEmpty() )
+		{
+			// get a block
+			ChunkCoordinates coords = remainingBlocks.first();
+			
+			// do BFS from this block to find the connected component
+			TreeSet<ChunkCoordinates> component = new TreeSet<ChunkCoordinates>( BlockUtils.searchForBlocks(
+				coords,
+				remainingBlocks.size(),
+				new BlockValidator( )
+				{
+					@Override
+					public boolean isValid( ChunkCoordinates coords )
+					{
+						return remainingBlocks.contains( coords );
+					}
+				}
+			) );
+			component.add( coords );
+			
+			// remove the component from the boundary blocks
+			remainingBlocks.removeAll( component );
+			
+			components.add( component );
+		}
+		return components;
+	}
+	
+	public static TreeSet<ChunkCoordinates> getBlocksAtYAndBelow( Set<ChunkCoordinates> inBlocks, int y )
+	{
+		// UNDONE: this could be optimized if we could answer y= queries efficiently
+		
+		TreeSet<ChunkCoordinates> outBlocks = new TreeSet<ChunkCoordinates>();
+		for( ChunkCoordinates coords : inBlocks )
+		{
+			if( coords.posY <= y )
+			{
+				outBlocks.add( coords );
+			}
+		}
+		return outBlocks;
+	}
+	
+	public static ChunkCoordinates getSizeOfAABB( Set<ChunkCoordinates> blocks )
+	{
+		if( blocks == null || blocks.isEmpty() )
+		{
+			throw new IllegalArgumentException( "blocks cannot be empty or null!" );
+		}
+		
+		ChunkCoordinates min = new ChunkCoordinates( Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE );
+		ChunkCoordinates max = new ChunkCoordinates( Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE );
+		
+		for( ChunkCoordinates coords : blocks )
+		{
+			min.posX = Math.min( min.posX, coords.posX );
+			min.posY = Math.min( min.posY, coords.posY );
+			min.posZ = Math.min( min.posZ, coords.posZ );
+			
+			max.posX = Math.max( max.posX, coords.posX );
+			max.posY = Math.max( max.posY, coords.posY );
+			max.posZ = Math.max( max.posZ, coords.posZ );
+		}
+		
+		return new ChunkCoordinates(
+			max.posX - min.posX + 1,
+			max.posY - min.posY + 1,
+			max.posZ - min.posZ + 1
+		);
+	}
+	
+	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks )
+	{
+		return getHoleFromInnerBoundary( innerBoundary, blocks, null );
+	}
+	
+	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, final Integer y )
+	{
+		ChunkCoordinates size;
+		if( innerBoundary instanceof TreeSet )
+		{
+			// if it's a tree set, use the shortcut
+			TreeSet<ChunkCoordinates> treeInnerBoundary = (TreeSet<ChunkCoordinates>)innerBoundary;
+			ChunkCoordinates min = treeInnerBoundary.first();
+			ChunkCoordinates max = treeInnerBoundary.last();
+			size = new ChunkCoordinates(
+				max.posX - min.posX + 1,
+				max.posY - min.posY + 1,
+				max.posZ - min.posZ + 1
+			);
+		}
+		else
+		{
+			// otherwise, compute the size the slow way
+			size = getSizeOfAABB( innerBoundary );
+		}
+		
+		// get the number of blocks inside the shell to use as an upper bound
+		int volume = size.posX * size.posY * size.posZ;
+		
+		// if we're just looking at one y-slice, adjust the volume
+		if( y != null )
+		{
+			volume = size.posX * size.posZ;
+		}
+		
+		// use BFS to find the enclosed blocks (including the boundary)
+		ChunkCoordinates sourceBlock = innerBoundary.iterator().next();
+		List<ChunkCoordinates> holeBlocks = BlockUtils.searchForBlocks(
+			sourceBlock,
+			volume,
+			new BlockValidator( )
+			{
+				@Override
+				public boolean isValid( ChunkCoordinates coords )
+				{
+					return !blocks.contains( coords ) && ( y == null || coords.posY == y );
+				}
+			}
+		);
+		
+		// just in case...
+		if( holeBlocks == null )
+		{
+			throw new Error( "Found too many enclosed blocks!" );
+		}
+		
+		holeBlocks.add( sourceBlock );
+		return new TreeSet<ChunkCoordinates>( holeBlocks );
 	}
 }
