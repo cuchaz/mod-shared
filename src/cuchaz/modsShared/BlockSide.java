@@ -46,6 +46,12 @@ public enum BlockSide
 		{
 			return compareWith.posY < compareTo.posY;
 		}
+
+		@Override
+		public double getFractionSubmerged( int y, double waterHeight )
+		{
+			return y <= waterHeight ? 1 : 0;
+		}
 	},
 	// y-axis (+)
 	Top( 0, 1, 0, new BoxCorner[] { BoxCorner.TopNorthEast, BoxCorner.TopNorthWest, BoxCorner.TopSouthWest, BoxCorner.TopSouthEast } )
@@ -84,6 +90,12 @@ public enum BlockSide
 		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
 		{
 			return compareWith.posY > compareTo.posY;
+		}
+
+		@Override
+		public double getFractionSubmerged( int y, double waterHeight )
+		{
+			return y + 1 <= waterHeight ? 1 : 0;
 		}
 	},
 	// z-axis (+)
@@ -124,6 +136,12 @@ public enum BlockSide
 		{
 			return compareWith.posZ > compareTo.posZ;
 		}
+
+		@Override
+		public double getFractionSubmerged( int y, double waterHeight )
+		{
+			return getSideFractionSubmerged( y, waterHeight );
+		}
 	},
 	// z-axis (-)
 	West( 0, 0, -1, new BoxCorner[] { BoxCorner.TopSouthWest, BoxCorner.TopNorthWest, BoxCorner.BottomNorthWest, BoxCorner.BottomSouthWest } )
@@ -162,6 +180,12 @@ public enum BlockSide
 		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
 		{
 			return compareWith.posZ < compareTo.posZ;
+		}
+
+		@Override
+		public double getFractionSubmerged( int y, double waterHeight )
+		{
+			return getSideFractionSubmerged( y, waterHeight );
 		}
 	},
 	// x-axis (+)
@@ -202,6 +226,12 @@ public enum BlockSide
 		{
 			return compareWith.posX > compareTo.posX;
 		}
+
+		@Override
+		public double getFractionSubmerged( int y, double waterHeight )
+		{
+			return getSideFractionSubmerged( y, waterHeight );
+		}
 	},
 	// x-axis (-)
 	South( -1, 0, 0, new BoxCorner[] { BoxCorner.TopSouthEast, BoxCorner.TopSouthWest, BoxCorner.BottomSouthWest, BoxCorner.BottomSouthEast } )
@@ -240,6 +270,12 @@ public enum BlockSide
 		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
 		{
 			return compareWith.posX < compareTo.posX;
+		}
+
+		@Override
+		public double getFractionSubmerged( int y, double waterHeight )
+		{
+			return getSideFractionSubmerged( y, waterHeight );
 		}
 	};
 	
@@ -338,9 +374,28 @@ public enum BlockSide
 	public abstract int getU( int x, int y, int z );
 	public abstract int getV( int x, int y, int z );
 	public abstract boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo );
-
+	public abstract double getFractionSubmerged( int y, double waterHeight );
+	
 	public static BlockSide[] xzSides( )
 	{
 		return m_xzSides;
+	}
+	
+	private static double getSideFractionSubmerged( int y, double waterHeight )
+	{
+		double bottom = y;
+		double top = y + 1;
+		if( top <= waterHeight )
+		{
+			return 1.0;
+		}
+		else if( bottom > waterHeight )
+		{
+			return 0;
+		}
+		else
+		{
+			return waterHeight - bottom;
+		}
 	}
 }

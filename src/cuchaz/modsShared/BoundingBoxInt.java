@@ -1,5 +1,9 @@
 package cuchaz.modsShared;
 
+import java.util.Set;
+
+import net.minecraft.util.ChunkCoordinates;
+
 public class BoundingBoxInt
 {
 	public int minX;
@@ -17,6 +21,15 @@ public class BoundingBoxInt
 		maxY = Integer.MIN_VALUE;
 		minZ = Integer.MAX_VALUE;
 		maxZ = Integer.MIN_VALUE;
+	}
+	
+	public BoundingBoxInt( Set<ChunkCoordinates> blocks )
+	{
+		this();
+		for( ChunkCoordinates coords : blocks )
+		{
+			expandBoxToInclude( coords.posX, coords.posY, coords.posZ );
+		}
 	}
 	
 	public void expandBoxToInclude( int x, int y, int z )
@@ -44,5 +57,22 @@ public class BoundingBoxInt
 	public int getDz( )
 	{
 		return maxZ - minZ + 1;
+	}
+	
+	public boolean containsPoint( ChunkCoordinates coords )
+	{
+		return containsPoint( coords.posX, coords.posY, coords.posZ );
+	}
+	
+	public boolean containsPoint( int x, int y, int z )
+	{
+		return x >= minX && x <= maxX
+			&& y >= minY && y <= maxY
+			&& z >= minZ && z <= maxZ;
+	}
+	
+	public int getVolume( )
+	{
+		return getDx()*getDy()*getDz();
 	}
 }

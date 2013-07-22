@@ -1,6 +1,7 @@
 package cuchaz.modsShared;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import net.minecraft.util.ChunkCoordinates;
@@ -10,14 +11,9 @@ public class Envelopes
 	private Map<BlockSide,BlockArray> m_envelopes;
 	private BoundingBoxInt m_boundingBox;
 	
-	public Envelopes( Iterable<ChunkCoordinates> blocks )
+	public Envelopes( Set<ChunkCoordinates> blocks )
 	{
-		// compute the bounding box
-		m_boundingBox = new BoundingBoxInt();
-		for( ChunkCoordinates coords : blocks )
-		{
-			m_boundingBox.expandBoxToInclude( coords.posX, coords.posY, coords.posZ );
-		}
+		m_boundingBox = new BoundingBoxInt( blocks );
 		
 		// init the extreme arrays
 		m_envelopes = new TreeMap<BlockSide,BlockArray>();
