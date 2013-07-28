@@ -219,17 +219,11 @@ public class BlockUtils
 		return getHoleFromInnerBoundary( innerBoundary, blocks, null );
 	}
 	
-	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, final Integer y )
+	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, final Integer yMax )
 	{
 		// get the number of blocks inside the shell to use as an upper bound
 		BoundingBoxInt box = new BoundingBoxInt( innerBoundary );
 		int volume = box.getVolume();
-		
-		// if we're just looking at one y-slice, adjust the volume
-		if( y != null )
-		{
-			volume = box.getDx()*box.getDz();
-		}
 		
 		// use BFS to find the enclosed blocks (including the boundary)
 		ChunkCoordinates sourceBlock = innerBoundary.iterator().next();
@@ -241,7 +235,7 @@ public class BlockUtils
 				@Override
 				public boolean isValid( ChunkCoordinates coords )
 				{
-					return !blocks.contains( coords ) && ( y == null || coords.posY == y );
+					return !blocks.contains( coords ) && ( yMax == null || coords.posY <= yMax );
 				}
 			}
 		);
