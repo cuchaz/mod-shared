@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.world.World;
 
 public class BlockUtils
 {
@@ -248,5 +249,13 @@ public class BlockUtils
 		
 		holeBlocks.add( sourceBlock );
 		return new TreeSet<ChunkCoordinates>( holeBlocks );
+	}
+	
+	public static void setBlockAndMetaWithoutTellingOldBlockItGotBroken( World world, int x, int y, int z, int blockId, int meta )
+	{
+		// UNDONE: implement me!
+		// get the chunk from the world
+		// use reflection to get Chunk.storageArrays
+		// emulate Chunk.setBlockIDWithMetadata()
 	}
 }
