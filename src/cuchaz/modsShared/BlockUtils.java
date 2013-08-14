@@ -1,5 +1,8 @@
 package cuchaz.modsShared;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -7,8 +10,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.minecraft.block.Block;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
 public class BlockUtils
 {
@@ -251,11 +258,126 @@ public class BlockUtils
 		return new TreeSet<ChunkCoordinates>( holeBlocks );
 	}
 	
-	public static void setBlockAndMetaWithoutTellingOldBlockItGotBroken( World world, int x, int y, int z, int blockId, int meta )
+	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z )
 	{
-		// UNDONE: implement me!
-		// get the chunk from the world
-		// use reflection to get Chunk.storageArrays
-		// emulate Chunk.setBlockIDWithMetadata()
+		// NOTE: this method emulates Chunk.setBlockIDWithMetadata()
+		
+		// set the block to air
+		final int TargetBlockId = 0;
+		final int TargetBlockMeta = 0;
+		
+		try
+		{
+			// get the masked coords
+			int mx = x & 15;
+			int my = y & 15;
+			int mz = z & 15;
+			
+			// get the chunk from the world
+			Chunk chunk = world.getChunkFromBlockCoords( x, z );
+			
+			// if the block didn't change, bail
+			int oldBlockId = chunk.getBlockID( mx, y, mz );
+			int oldBlockMeta = chunk.getBlockMetadata( mx, y, mz );
+			if( oldBlockId == TargetBlockId )
+			{
+				return false;
+			}
+			
+			// use reflection to get access to Chunk internals
+			Field chunkPrecipitationHeightMapField = Chunk.class.getDeclaredField( "precipitationHeightMap" );
+			chunkPrecipitationHeightMapField.setAccessible( true );
+			Field chunkHeightMapField = Chunk.class.getDeclaredField( "heightMap" );
+			chunkHeightMapField.setAccessible( true );
+			Field chunkStorageArraysField = Chunk.class.getDeclaredField( "storageArrays" );
+			chunkStorageArraysField.setAccessible( true );
+			ExtendedBlockStorage[] storageArrays = (ExtendedBlockStorage[])chunkStorageArraysField.get( chunk );
+			Field chunkIsModifiedField = Chunk.class.getDeclaredField( "isModified" );
+			chunkIsModifiedField.setAccessible( true );
+			Method chunkRelightBlockMethod = Chunk.class.getDeclaredMethod( "relightBlock", int.class, int.class, int.class );
+			chunkRelightBlockMethod.setAccessible( true );
+			Method chunkPropagateSkylightOcclusionMethod = Chunk.class.getDeclaredMethod( "propagateSkylightOcclusion", int.class, int.class );
+			chunkPropagateSkylightOcclusionMethod.setAccessible( true );
+			
+			// get chunk field values
+			int[] precipitationHeightMap = (int[])chunkPrecipitationHeightMapField.get( chunk );
+			int[] heightMap = (int[])chunkHeightMapField.get( chunk );
+			
+			// update rain map
+			int heightMapIndex = mz << 4 | mx;
+			if( y >= precipitationHeightMap[heightMapIndex] - 1 )
+			{
+				precipitationHeightMap[heightMapIndex] = -999;
+			}
+			int height = heightMap[heightMapIndex];
+			
+			// clean up any tile entities
+			if( oldBlockId != 0 && Block.blocksList[oldBlockId] != null && Block.blocksList[oldBlockId].hasTileEntity( oldBlockMeta ) )
+			{
+				// remove it from the chunk
+				TileEntity tileEntity = chunk.getChunkBlockTileEntity( mx, y, mz );
+				if( tileEntity != null )
+				{
+					tileEntity.invalidate();
+					chunk.removeChunkBlockTileEntity( mx, y, mz );
+				}
+			}
+			
+			// save the block info
+			ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
+			assert( extendedblockstorage != null );
+			extendedblockstorage.setExtBlockID( mx, my, mz, TargetBlockId );
+			extendedblockstorage.setExtBlockMetadata( mx, my, mz, TargetBlockMeta );
+			
+			// update lighting
+			if( chunk.getBlockLightOpacity( mx, y, mz ) > 0 )
+			{
+				if( y >= height )
+				{
+					chunkRelightBlockMethod.invoke( chunk, mx, y + 1, mz );
+				}
+			}
+			else if( y == height - 1 )
+			{
+				chunkRelightBlockMethod.invoke( chunk, mx, y, mz );
+			}
+			chunkPropagateSkylightOcclusionMethod.invoke( chunk, mx, mz );
+			
+			// make the chunk dirty
+			chunkIsModifiedField.setBoolean( chunk, true );
+			
+			// handle block updates
+			world.markBlockForUpdate( x, y, z );
+            if( !world.isRemote )
+            {
+                world.notifyBlockChange( x, y, z, oldBlockId );
+            }
+            
+			return true;
+		}
+		catch( NoSuchFieldException ex )
+		{
+			throw new Error( "Unable to remove block! Chunk class has changed!", ex );
+		}
+		catch( NoSuchMethodException ex )
+		{
+			throw new Error( "Unable to remove block! Chunk class has changed!", ex );
+		}
+		catch( IllegalAccessException ex )
+		{
+			throw new Error( "Unable to remove block! Access to Chunk instance was denied!", ex );
+		}
+		catch( SecurityException ex )
+		{
+			throw new Error( "Unable to remove block! Access to Chunk instance was denied!", ex );
+		}
+		catch( IllegalArgumentException ex )
+		{
+			throw new Error( "Unable to remove block! Chunk method has changed!", ex );
+		}
+		catch( InvocationTargetException ex )
+		{
+			throw new Error( "Unable to remove block! Chunk method call failed!", ex );
+		}
 	}
 }
