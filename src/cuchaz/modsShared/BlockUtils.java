@@ -260,11 +260,12 @@ public class BlockUtils
 	
 	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z )
 	{
+		return changeBlockWithoutNotifyingIt( world, x, y, z, 0, 0 );
+	}
+	
+	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta )
+	{
 		// NOTE: this method emulates Chunk.setBlockIDWithMetadata()
-		
-		// set the block to air
-		final int TargetBlockId = 0;
-		final int TargetBlockMeta = 0;
 		
 		try
 		{
@@ -279,8 +280,13 @@ public class BlockUtils
 			// if the block didn't change, bail
 			int oldBlockId = chunk.getBlockID( mx, y, mz );
 			int oldBlockMeta = chunk.getBlockMetadata( mx, y, mz );
-			if( oldBlockId == TargetBlockId )
+			if( oldBlockId == targetBlockId )
 			{
+				if( oldBlockMeta != targetBlockMeta )
+				{
+					// UNDONE: refactor this to use the real logging system
+					System.err.println( String.format( "Warning: Ignoring block metadata change for block %d at (%d,%d,%d)", oldBlockId, x, y, z ) );
+				}
 				return false;
 			}
 			
@@ -326,8 +332,8 @@ public class BlockUtils
 			// save the block info
 			ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
 			assert( extendedblockstorage != null );
-			extendedblockstorage.setExtBlockID( mx, my, mz, TargetBlockId );
-			extendedblockstorage.setExtBlockMetadata( mx, my, mz, TargetBlockMeta );
+			extendedblockstorage.setExtBlockID( mx, my, mz, targetBlockId );
+			extendedblockstorage.setExtBlockMetadata( mx, my, mz, targetBlockMeta );
 			
 			// update lighting
 			if( chunk.getBlockLightOpacity( mx, y, mz ) > 0 )
