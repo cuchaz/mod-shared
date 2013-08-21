@@ -7,7 +7,7 @@ import net.minecraft.util.Icon;
 
 public enum BlockSide
 {
-	// NOTE: order is important
+	// NOTE: order is important Bottom, Top, North, South, West, East
 	// y-axis (-)
 	Bottom( 0, -1, 0, new BoxCorner[] { BoxCorner.BottomNorthEast, BoxCorner.BottomNorthWest, BoxCorner.BottomSouthWest, BoxCorner.BottomSouthEast } )
 	{
@@ -98,53 +98,8 @@ public enum BlockSide
 			return y + 1 <= waterHeight ? 1 : 0;
 		}
 	},
-	// z-axis (+)
-	East( 0, 0, 1, new BoxCorner[] { BoxCorner.TopNorthEast, BoxCorner.TopSouthEast, BoxCorner.BottomSouthEast, BoxCorner.BottomNorthEast } )
-	{
-		@Override
-		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
-		{
-			renderBlocks.renderFaceZPos( block, (double)x, (double)y, (double)z, icon );
-		}
-		
-		@Override
-		public int getWidth( int dx, int dy, int dz )
-		{
-			return dx;
-		}
-		
-		@Override
-		public int getHeight( int dx, int dy, int dz )
-		{
-			return dy;
-		}
-
-		@Override
-		public int getU( int x, int y, int z )
-		{
-			return x;
-		}
-
-		@Override
-		public int getV( int x, int y, int z )
-		{
-			return y;
-		}
-		
-		@Override
-		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
-		{
-			return compareWith.posZ > compareTo.posZ;
-		}
-
-		@Override
-		public double getFractionSubmerged( int y, double waterHeight )
-		{
-			return getSideFractionSubmerged( y, waterHeight );
-		}
-	},
 	// z-axis (-)
-	West( 0, 0, -1, new BoxCorner[] { BoxCorner.TopSouthWest, BoxCorner.TopNorthWest, BoxCorner.BottomNorthWest, BoxCorner.BottomSouthWest } )
+	North( 0, 0, -1, new BoxCorner[] { BoxCorner.TopNorthWest, BoxCorner.TopNorthEast, BoxCorner.BottomNorthEast, BoxCorner.BottomNorthWest } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
@@ -188,19 +143,19 @@ public enum BlockSide
 			return getSideFractionSubmerged( y, waterHeight );
 		}
 	},
-	// x-axis (+)
-	North( 1, 0, 0, new BoxCorner[] { BoxCorner.TopNorthWest, BoxCorner.TopNorthEast, BoxCorner.BottomNorthEast, BoxCorner.BottomNorthWest } )
+	// z-axis (+)
+	South( 0, 0, 1, new BoxCorner[] { BoxCorner.TopSouthEast, BoxCorner.TopSouthWest, BoxCorner.BottomSouthWest, BoxCorner.BottomSouthEast } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
 		{
-			renderBlocks.renderFaceXPos( block, (double)x, (double)y, (double)z, icon );
+			renderBlocks.renderFaceZPos( block, (double)x, (double)y, (double)z, icon );
 		}
 		
 		@Override
 		public int getWidth( int dx, int dy, int dz )
 		{
-			return dz;
+			return dx;
 		}
 		
 		@Override
@@ -208,11 +163,11 @@ public enum BlockSide
 		{
 			return dy;
 		}
-		
+
 		@Override
 		public int getU( int x, int y, int z )
 		{
-			return z;
+			return x;
 		}
 
 		@Override
@@ -224,7 +179,7 @@ public enum BlockSide
 		@Override
 		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
 		{
-			return compareWith.posX > compareTo.posX;
+			return compareWith.posZ > compareTo.posZ;
 		}
 
 		@Override
@@ -234,7 +189,7 @@ public enum BlockSide
 		}
 	},
 	// x-axis (-)
-	South( -1, 0, 0, new BoxCorner[] { BoxCorner.TopSouthEast, BoxCorner.TopSouthWest, BoxCorner.BottomSouthWest, BoxCorner.BottomSouthEast } )
+	West( -1, 0, 0, new BoxCorner[] { BoxCorner.TopSouthWest, BoxCorner.TopNorthWest, BoxCorner.BottomNorthWest, BoxCorner.BottomSouthWest } )
 	{
 		@Override
 		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
@@ -270,6 +225,51 @@ public enum BlockSide
 		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
 		{
 			return compareWith.posX < compareTo.posX;
+		}
+
+		@Override
+		public double getFractionSubmerged( int y, double waterHeight )
+		{
+			return getSideFractionSubmerged( y, waterHeight );
+		}
+	},
+	// x-axis (+)
+	East( 1, 0, 0, new BoxCorner[] { BoxCorner.TopNorthEast, BoxCorner.TopSouthEast, BoxCorner.BottomSouthEast, BoxCorner.BottomNorthEast } )
+	{
+		@Override
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		{
+			renderBlocks.renderFaceXPos( block, (double)x, (double)y, (double)z, icon );
+		}
+		
+		@Override
+		public int getWidth( int dx, int dy, int dz )
+		{
+			return dz;
+		}
+		
+		@Override
+		public int getHeight( int dx, int dy, int dz )
+		{
+			return dy;
+		}
+		
+		@Override
+		public int getU( int x, int y, int z )
+		{
+			return z;
+		}
+
+		@Override
+		public int getV( int x, int y, int z )
+		{
+			return y;
+		}
+		
+		@Override
+		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		{
+			return compareWith.posX > compareTo.posX;
 		}
 
 		@Override
