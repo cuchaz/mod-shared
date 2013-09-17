@@ -238,6 +238,19 @@ public class CircleRange implements Comparable<CircleRange>, Serializable
 		return angle;
 	}
 	
+	public static float mapZeroTo360( float angle )
+	{
+		while( angle >= 360.0f )
+		{
+			angle -= 360.0f;
+		}
+		while( angle < 0 )
+		{
+			angle += 360.0f;
+		}
+		return angle;
+	}
+	
 	public static boolean isEq( double a, double b )
 	{
 		return isEq( a, b, CompareReal.getEpsilon() );

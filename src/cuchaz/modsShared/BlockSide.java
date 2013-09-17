@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Icon;
+import net.minecraft.util.MathHelper;
 
 public enum BlockSide
 {
@@ -282,7 +283,7 @@ public enum BlockSide
 	private static BlockSide[] m_xzSides;
 	
 	private BlockSide m_oppositeSide;
-	private BlockSide m_xzNextSide;
+	private int m_xzOffset;
 	private int m_dx;
 	private int m_dy;
 	private int m_dz;
@@ -296,7 +297,6 @@ public enum BlockSide
 		m_corners = corners;
 		
 		m_oppositeSide = null;
-		m_xzNextSide = null;
 	}
 	
 	static
@@ -309,13 +309,12 @@ public enum BlockSide
 		North.m_oppositeSide = South;
 		South.m_oppositeSide = North;
 		
-		// set zx plane order
-		North.m_xzNextSide = West;
-		West.m_xzNextSide = South;
-		South.m_xzNextSide = East;
-		East.m_xzNextSide = North;
-		
+		// set zx side order
 		m_xzSides = new BlockSide[] { North, East, South, West };
+		North.m_xzOffset = 0;
+		East.m_xzOffset = 1;
+		South.m_xzOffset = 2;
+		West.m_xzOffset = 3;
 	}
 	
 	public int getId( )
@@ -348,9 +347,19 @@ public enum BlockSide
 		return m_oppositeSide;
 	}
 	
-	public BlockSide getXZNextSide( )
+	public int getXZOffset( )
 	{
-		return m_xzNextSide;
+		return m_xzOffset;
+	}
+	
+	public BlockSide rotateXZCcw( int offset )
+	{
+		return m_xzSides[( m_xzOffset + m_xzSides.length - offset ) % m_xzSides.length];
+	}
+	
+	public BlockSide rotateXZCw( int offset )
+	{
+		return m_xzSides[( m_xzOffset + offset ) % m_xzSides.length];
 	}
 	
 	public static BlockSide getById( int side )
@@ -358,14 +367,23 @@ public enum BlockSide
 		return values()[side];
 	}
 	
-	public static BlockSide getByXZOffset( BlockSide start, int offset )
+	public static BlockSide getByYaw( float yaw )
 	{
-		BlockSide side = start;
-		for( int i=0; i<offset; i++ )
-		{
-			side = side.getXZNextSide();
-		}
-		return side;
+		// yaw values mapped to view direction and xzOffsets:
+		// 0   south  2
+		// 90  west   3
+		// 180 north  0
+		// -90 east   1
+		
+		int offset = MathHelper.floor_float( CircleRange.mapZeroTo360( yaw )*4.0f/360.0f + 0.5f ) % m_xzSides.length;
+		
+		// assume we're looking at a block. Return the side we're looking at rather than the direction in which we're looking
+		return m_xzSides[offset].getOppositeSide();
+	}
+	
+	public static BlockSide getByXZOffset( int offset )
+	{
+		return m_xzSides[offset];
 	}
 	
 	public abstract void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon );
