@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +18,86 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
 public class BlockUtils
 {
+	public static enum Neighbors
+	{
+		Faces
+		{
+			@Override
+			public int getNumNeighbors( )
+			{
+				return BlockSide.values().length;
+			}
+			
+			@Override
+			public void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i )
+			{
+				BlockSide side = BlockSide.values()[i];
+				out.posX = in.posX + side.getDx();
+				out.posY = in.posY + side.getDy();
+				out.posZ = in.posZ + side.getDz();
+			}
+		},
+		Edges
+		{
+			private int[] dx = {  0, -1,  1,  0, -1,  1, -1,  1,  0, -1,  1,  0 };
+			private int[] dy = { -1,  0,  0,  1, -1, -1,  1,  1, -1,  0,  0,  1 };
+			private int[] dz = { -1, -1, -1, -1,  0,  0,  0,  0,  1,  1,  1,  1 };
+			
+			@Override
+			public int getNumNeighbors( )
+			{
+				return Faces.getNumNeighbors() + dx.length;
+			}
+			
+			@Override
+			public void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i )
+			{
+				if( i < Faces.getNumNeighbors() )
+				{
+					Faces.getNeighbor( out, in, i );
+				}
+				else
+				{
+					i -= Faces.getNumNeighbors();
+					out.posX = in.posX + dx[i];
+					out.posY = in.posY + dy[i];
+					out.posZ = in.posZ + dz[i];
+				}
+			}
+		},
+		Vertices
+		{
+			private int[] dx = { -1,  1, -1,  1, -1,  1, -1,  1 };
+			private int[] dy = { -1, -1,  1,  1, -1, -1,  1,  1 };
+			private int[] dz = { -1, -1, -1, -1,  1,  1,  1,  1 };
+			
+			@Override
+			public int getNumNeighbors( )
+			{
+				return Edges.getNumNeighbors() + dx.length;
+			}
+			
+			@Override
+			public void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i )
+			{
+				if( i < Edges.getNumNeighbors() )
+				{
+					Edges.getNeighbor( out, in, i );
+				}
+				else
+				{
+					i -= Edges.getNumNeighbors();
+					out.posX = in.posX + dx[i];
+					out.posY = in.posY + dy[i];
+					out.posZ = in.posZ + dz[i];
+				}
+			}
+		};
+		
+		public abstract int getNumNeighbors( );
+		public abstract void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i );
+	}
+	
 	public static interface BlockValidator
 	{
 		public boolean isValid( ChunkCoordinates coords );
@@ -69,17 +148,17 @@ public class BlockUtils
 		return Math.abs( ax - bx ) + Math.abs( az - bz );
 	}
 	
-	public static List<ChunkCoordinates> searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockValidator validator )
+	public static List<ChunkCoordinates> searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockValidator validator, Neighbors neighbors )
 	{
-		return searchForBlocks( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator );
+		return searchForBlocks( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator, neighbors );
 	}
 	
-	public static List<ChunkCoordinates> searchForBlocks( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockValidator validator )
+	public static List<ChunkCoordinates> searchForBlocks( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockValidator validator, Neighbors neighbors )
 	{
 		// do BFS to find valid blocks starting at the source block
 		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
 		queue.add( sourceBlock );
-		HashSet<ChunkCoordinates> visitedBlocks = new HashSet<ChunkCoordinates>();
+		TreeSet<ChunkCoordinates> visitedBlocks = new TreeSet<ChunkCoordinates>();
 		List<ChunkCoordinates> foundBlocks = new ArrayList<ChunkCoordinates>();
 		
 		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
@@ -103,12 +182,9 @@ public class BlockUtils
 			}
 			
 			// check the block's neighbors
-			for( BlockSide side : BlockSide.values() )
+			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
 			{
-				neighborCoords.posX = block.posX + side.getDx();
-				neighborCoords.posY = block.posY + side.getDy();
-				neighborCoords.posZ = block.posZ + side.getDz();
-				
+				neighbors.getNeighbor( neighborCoords, block, i );
 				if( isValidNeighbor( neighborCoords, validator, queue, visitedBlocks ) )
 				{
 					queue.add( new ChunkCoordinates( neighborCoords ) );
@@ -119,17 +195,17 @@ public class BlockUtils
 		return foundBlocks;
 	}
 	
-	public static Boolean searchForCondition( int x, int y, int z, int maxNumBlocks, BlockConditionValidator validator )
+	public static Boolean searchForCondition( int x, int y, int z, int maxNumBlocks, BlockConditionValidator validator, Neighbors neighbors )
 	{
-		return searchForCondition( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator );
+		return searchForCondition( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator, neighbors );
 	}
 	
-	public static Boolean searchForCondition( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockConditionValidator validator )
+	public static Boolean searchForCondition( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockConditionValidator validator, Neighbors neighbors )
 	{
 		// do BFS to find valid blocks starting at the source block
 		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
 		queue.add( sourceBlock );
-		HashSet<ChunkCoordinates> visitedBlocks = new HashSet<ChunkCoordinates>();
+		TreeSet<ChunkCoordinates> visitedBlocks = new TreeSet<ChunkCoordinates>();
 		
 		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
 		while( !queue.isEmpty() )
@@ -152,12 +228,9 @@ public class BlockUtils
 			}
 			
 			// check the block's neighbors
-			for( BlockSide side : BlockSide.values() )
+			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
 			{
-				neighborCoords.posX = block.posX + side.getDx();
-				neighborCoords.posY = block.posY + side.getDy();
-				neighborCoords.posZ = block.posZ + side.getDz();
-				
+				neighbors.getNeighbor( neighborCoords, block, i );
 				if( isValidNeighbor( neighborCoords, validator, queue, visitedBlocks ) )
 				{
 					queue.add( new ChunkCoordinates( neighborCoords ) );
@@ -168,6 +241,46 @@ public class BlockUtils
 		return false;
 	}
 	
+	public static ChunkCoordinates searchForBlock( int x, int y, int z, int maxNumBlocks, BlockConditionValidator validator, Neighbors neighbors )
+	{
+		return searchForBlock( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator, neighbors );
+	}
+	
+	public static ChunkCoordinates searchForBlock( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockConditionValidator validator, Neighbors neighbors )
+	{
+		// do BFS to find the first valid block starting at the source block
+		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
+		queue.add( sourceBlock );
+		TreeSet<ChunkCoordinates> visitedBlocks = new TreeSet<ChunkCoordinates>();
+		
+		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
+		while( !queue.isEmpty() )
+		{
+			// get the block and visit it
+			ChunkCoordinates block = queue.iterator().next();
+			queue.remove( block );
+			visitedBlocks.add( block );
+			
+			// is this our target block?
+			if( !block.equals( sourceBlock ) && validator.isConditionMet( block ) )
+			{
+				return block;
+			}
+			
+			// check the block's neighbors
+			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
+			{
+				neighbors.getNeighbor( neighborCoords, block, i );
+				if( isValidNeighbor( neighborCoords, validator, queue, visitedBlocks ) )
+				{
+					queue.add( new ChunkCoordinates( neighborCoords ) );
+				}
+			}
+		}
+		
+		return null;
+	}
+	
 	private static boolean isValidNeighbor( ChunkCoordinates coords, BlockValidator validator, Set<ChunkCoordinates> queue, Set<ChunkCoordinates> visitedBlocks )
 	{
 		return validator.isValid( coords )
@@ -175,7 +288,7 @@ public class BlockUtils
 			&& !queue.contains( coords );
 	}
 	
-	public static List<TreeSet<ChunkCoordinates>> getConnectedComponents( Set<ChunkCoordinates> blocks )
+	public static List<TreeSet<ChunkCoordinates>> getConnectedComponents( Set<ChunkCoordinates> blocks, Neighbors neighbors )
 	{
 		List<TreeSet<ChunkCoordinates>> components = new ArrayList<TreeSet<ChunkCoordinates>>();
 		final TreeSet<ChunkCoordinates> remainingBlocks = new TreeSet<ChunkCoordinates>( blocks );
@@ -195,7 +308,8 @@ public class BlockUtils
 					{
 						return remainingBlocks.contains( coords );
 					}
-				}
+				},
+				neighbors
 			) );
 			component.add( coords );
 			
@@ -222,12 +336,12 @@ public class BlockUtils
 		return outBlocks;
 	}
 	
-	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks )
+	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, Neighbors neighbors )
 	{
-		return getHoleFromInnerBoundary( innerBoundary, blocks, null );
+		return getHoleFromInnerBoundary( innerBoundary, blocks, neighbors, null );
 	}
 	
-	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, final Integer yMax )
+	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, Neighbors neighbors, final Integer yMax )
 	{
 		// get the number of blocks inside the shell to use as an upper bound
 		BoundingBoxInt box = new BoundingBoxInt( innerBoundary );
@@ -245,7 +359,8 @@ public class BlockUtils
 				{
 					return !blocks.contains( coords ) && ( yMax == null || coords.posY <= yMax );
 				}
-			}
+			},
+			neighbors
 		);
 		
 		// just in case...
@@ -331,7 +446,11 @@ public class BlockUtils
 			
 			// save the block info
 			ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
-			assert( extendedblockstorage != null );
+			if( extendedblockstorage == null )
+			{
+				extendedblockstorage = new ExtendedBlockStorage( y >> 4 << 4, !world.provider.hasNoSky );
+				storageArrays[y >> 4] = extendedblockstorage;
+			}
 			extendedblockstorage.setExtBlockID( mx, my, mz, targetBlockId );
 			extendedblockstorage.setExtBlockMetadata( mx, my, mz, targetBlockMeta );
 			

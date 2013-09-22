@@ -8,6 +8,39 @@ import net.minecraft.util.ChunkCoordinates;
 
 public class BlockArray implements Iterable<ChunkCoordinates>
 {
+	public static enum Rotation
+	{
+		None
+		{
+			@Override
+			public BlockArray rotate( BlockArray blocks )
+			{
+				return blocks;
+			}
+		},
+		Ccw90
+		{
+			@Override
+			public BlockArray rotate( BlockArray blocks )
+			{
+				BlockArray out = new BlockArray( 0, 0, blocks.getHeight(), blocks.getWidth() );
+				for( int u=0; u<out.getWidth(); u++ )
+				{
+					for( int v=0; v<out.getHeight(); v++ )
+					{
+						out.m_blocks[v][u] = blocks.m_blocks[blocks.getHeight() - 1 - u][v];
+					}
+				}
+				return out;
+			}
+		};
+		// UNDONE: implement these if needed
+		//Ccw180
+		//Ccw270
+		
+		public abstract BlockArray rotate( BlockArray blocks );
+	}
+	
 	private int m_uMin;
 	private int m_vMin;
 	private ChunkCoordinates[][] m_blocks;
@@ -65,6 +98,11 @@ public class BlockArray implements Iterable<ChunkCoordinates>
 	public int toZeroBasedV( int v )
 	{
 		return v - m_vMin;
+	}
+	
+	public BlockArray newEmptyCopy( )
+	{
+		return new BlockArray( m_uMin, m_vMin, getWidth(), getHeight() );
 	}
 
 	@Override
