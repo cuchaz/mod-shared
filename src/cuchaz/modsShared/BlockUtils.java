@@ -344,7 +344,7 @@ public class BlockUtils
 	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, Neighbors neighbors, final Integer yMax )
 	{
 		// get the number of blocks inside the shell to use as an upper bound
-		BoundingBoxInt box = new BoundingBoxInt( innerBoundary );
+		BoundingBoxInt box = new BoundingBoxInt( blocks );
 		int volume = box.getVolume();
 		
 		// use BFS to find the enclosed blocks (including the boundary)
