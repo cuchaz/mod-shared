@@ -29,6 +29,16 @@ public class RotatedBB
 		m_centerZ = centerZ;
 	}
 	
+	public AxisAlignedBB getAABox( )
+	{
+		return m_box;
+	}
+	
+	public float getYaw( )
+	{
+		return m_yaw;
+	}
+	
 	public double getMinY( )
 	{
 		return m_box.minY;
