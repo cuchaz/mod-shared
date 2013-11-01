@@ -406,18 +406,18 @@ public class BlockUtils
 			}
 			
 			// use reflection to get access to Chunk internals
-			Field chunkPrecipitationHeightMapField = Chunk.class.getDeclaredField( "precipitationHeightMap" );
+			Field chunkPrecipitationHeightMapField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "precipitationHeightMap", "field_76638_b" ) );
 			chunkPrecipitationHeightMapField.setAccessible( true );
-			Field chunkHeightMapField = Chunk.class.getDeclaredField( "heightMap" );
+			Field chunkHeightMapField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "heightMap", "field_76634_f" ) );
 			chunkHeightMapField.setAccessible( true );
-			Field chunkStorageArraysField = Chunk.class.getDeclaredField( "storageArrays" );
+			Field chunkStorageArraysField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "storageArrays", "field_76652_q" ) );
 			chunkStorageArraysField.setAccessible( true );
 			ExtendedBlockStorage[] storageArrays = (ExtendedBlockStorage[])chunkStorageArraysField.get( chunk );
-			Field chunkIsModifiedField = Chunk.class.getDeclaredField( "isModified" );
+			Field chunkIsModifiedField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "isModified", "field_76643_l" ) );
 			chunkIsModifiedField.setAccessible( true );
-			Method chunkRelightBlockMethod = Chunk.class.getDeclaredMethod( "relightBlock", int.class, int.class, int.class );
+			Method chunkRelightBlockMethod = Chunk.class.getDeclaredMethod( RuntimeMapping.getRuntimeName( "relightBlock", "func_76615_h" ), int.class, int.class, int.class );
 			chunkRelightBlockMethod.setAccessible( true );
-			Method chunkPropagateSkylightOcclusionMethod = Chunk.class.getDeclaredMethod( "propagateSkylightOcclusion", int.class, int.class );
+			Method chunkPropagateSkylightOcclusionMethod = Chunk.class.getDeclaredMethod( RuntimeMapping.getRuntimeName( "propagateSkylightOcclusion", "func_76595_e" ), int.class, int.class );
 			chunkPropagateSkylightOcclusionMethod.setAccessible( true );
 			
 			// get chunk field values
