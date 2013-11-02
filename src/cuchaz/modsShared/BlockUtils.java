@@ -399,8 +399,7 @@ public class BlockUtils
 			{
 				if( oldBlockMeta != targetBlockMeta )
 				{
-					// UNDONE: refactor this to use the real logging system
-					System.err.println( String.format( "Warning: Ignoring block metadata change for block %d at (%d,%d,%d)", oldBlockId, x, y, z ) );
+					Log.logger.warning( String.format( "Ignoring block metadata change for block %d at (%d,%d,%d)", oldBlockId, x, y, z ) );
 				}
 				return false;
 			}

@@ -7,6 +7,7 @@ import java.net.JarURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.logging.Level;
 
 import cpw.mods.fml.common.InjectedModContainer;
 import cpw.mods.fml.common.LoadController;
@@ -67,7 +68,7 @@ public class FMLHacker
 		}
 		catch( Exception ex )
 		{
-			ex.printStackTrace( System.err );
+			Log.logger.log( Level.WARNING, "Unable to unwrap mod container!", ex );
 		}
 	}
 	
