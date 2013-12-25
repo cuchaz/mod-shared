@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +22,9 @@ import java.util.TreeSet;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -385,10 +388,20 @@ public class BlockUtils
 	
 	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z )
 	{
-		return changeBlockWithoutNotifyingIt( world, x, y, z, 0, 0 );
+		return removeBlockWithoutNotifyingIt( world, x, y, z, true );
+	}
+	
+	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z, boolean sendNotifications )
+	{
+		return changeBlockWithoutNotifyingIt( world, x, y, z, 0, 0, sendNotifications );
 	}
 	
 	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta )
+	{
+		return changeBlockWithoutNotifyingIt( world, x, y, z, targetBlockId, targetBlockMeta, true );
+	}
+	
+	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta, boolean sendNotifications )
 	{
 		// NOTE: this method emulates Chunk.setBlockIDWithMetadata()
 		
@@ -481,12 +494,15 @@ public class BlockUtils
 			chunkIsModifiedField.setBoolean( chunk, true );
 			
 			// handle block updates
-			world.markBlockForUpdate( x, y, z );
-            if( !world.isRemote )
-            {
-                world.notifyBlockChange( x, y, z, oldBlockId );
-            }
-            
+			if( sendNotifications )
+			{
+				world.markBlockForUpdate( x, y, z );
+	            if( !world.isRemote )
+	            {
+	                world.notifyBlockChange( x, y, z, oldBlockId );
+	            }
+			}
+			
 			return true;
 		}
 		catch( NoSuchFieldException ex )
@@ -513,5 +529,29 @@ public class BlockUtils
 		{
 			throw new Error( "Unable to remove block! Chunk method call failed!", ex );
 		}
+	}
+
+	public static void getWorldCollisionBoxes( List<AxisAlignedBB> out, World world, AxisAlignedBB queryBox )
+	{
+		int minX = MathHelper.floor_double( queryBox.minX );
+        int maxX = MathHelper.floor_double( queryBox.maxX );
+        int minY = MathHelper.floor_double( queryBox.minY );
+        int maxY = MathHelper.floor_double( queryBox.maxY );
+        int minZ = MathHelper.floor_double( queryBox.minZ );
+        int maxZ = MathHelper.floor_double( queryBox.maxZ );
+        for( int x=minX; x<=maxX; x++ )
+        {
+            for( int z=minZ; z<=maxZ; z++ )
+            {
+                for( int y=minY; y<=maxY; y++ )
+                {
+                    Block block = Block.blocksList[world.getBlockId( x, y, z )];
+                    if( block != null )
+                    {
+                        block.addCollisionBoxesToList( world, x, y, z, queryBox, out, null );
+                    }
+                }
+            }
+        }
 	}
 }
