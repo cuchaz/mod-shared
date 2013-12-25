@@ -19,6 +19,16 @@ public class Util
 		return x*TicksPerSecond;
 	}
 	
+	public static double perTickToPerSecond( double x )
+	{
+		return x*TicksPerSecond;
+	}
+	
+	public static double perTick2ToPerSecond2( double x )
+	{
+		return x*TicksPerSecond*TicksPerSecond;
+	}
+	
 	public static double ticksToSeconds( double x )
 	{
 		return x/TicksPerSecond;
@@ -27,6 +37,11 @@ public class Util
 	public static double perSecond2ToPerTick2( double x )
 	{
 		return x/TicksPerSecond/TicksPerSecond;
+	}
+	
+	public static double perSecondToPerTick( double x )
+	{
+		return x/TicksPerSecond;
 	}
 	
 	public static int realModulus( int a, int b )
