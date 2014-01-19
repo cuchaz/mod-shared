@@ -42,6 +42,16 @@ public class BoundingBoxInt
 		}
 	}
 	
+	public BoundingBoxInt( BoundingBoxInt other )
+	{
+		minX = other.minX;
+		minY = other.minY;
+		minZ = other.minZ;
+		maxX = other.maxX;
+		maxY = other.maxY;
+		maxZ = other.maxZ;
+	}
+
 	public void expandBoxToInclude( int x, int y, int z )
 	{
 		minX = Math.min( minX, x );

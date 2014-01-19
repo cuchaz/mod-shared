@@ -18,6 +18,11 @@ public class EntityUtils
 {
 	public static Vec3 getPlayerEyePos( EntityPlayer player )
 	{
+		if( player == null )
+		{
+			throw new IllegalArgumentException( "player cannot be null!" );
+		}
+		
 		return player.worldObj.getWorldVec3Pool().getVecFromPool(
 			player.posX,
 			player.posY + ( player.worldObj.isRemote ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight() ),
@@ -27,6 +32,11 @@ public class EntityUtils
 	
 	public static Vec3 getPlayerLookDirection( EntityPlayer player )
 	{
+		if( player == null )
+		{
+			throw new IllegalArgumentException( "player cannot be null!" );
+		}
+		
 		final double toRadians = Math.PI / 180.0;
 		float pitch = (float)( player.rotationPitch * toRadians );
 		float yaw = (float)( player.rotationYaw * toRadians );
