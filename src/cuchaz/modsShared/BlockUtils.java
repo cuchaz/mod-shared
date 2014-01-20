@@ -14,7 +14,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -278,6 +277,12 @@ public class BlockUtils
 			if( !block.equals( sourceBlock ) && validator.isConditionMet( block ) )
 			{
 				return block;
+			}
+			
+			// check the block cap
+			if( visitedBlocks.size() >= maxNumBlocks )
+			{
+				return null;
 			}
 			
 			// check the block's neighbors
@@ -549,6 +554,29 @@ public class BlockUtils
                     if( block != null )
                     {
                         block.addCollisionBoxesToList( world, x, y, z, queryBox, out, null );
+                    }
+                }
+            }
+        }
+	}
+	
+	public static void worldRangeQuery( List<ChunkCoordinates> out, World world, AxisAlignedBB queryBox )
+	{
+		int minX = MathHelper.floor_double( queryBox.minX );
+        int maxX = MathHelper.floor_double( queryBox.maxX );
+        int minY = MathHelper.floor_double( queryBox.minY );
+        int maxY = MathHelper.floor_double( queryBox.maxY );
+        int minZ = MathHelper.floor_double( queryBox.minZ );
+        int maxZ = MathHelper.floor_double( queryBox.maxZ );
+        for( int x=minX; x<=maxX; x++ )
+        {
+            for( int z=minZ; z<=maxZ; z++ )
+            {
+                for( int y=minY; y<=maxY; y++ )
+                {
+                    if( Block.blocksList[world.getBlockId( x, y, z )] != null )
+                    {
+                        out.add( new ChunkCoordinates( x, y, z ) );
                     }
                 }
             }
