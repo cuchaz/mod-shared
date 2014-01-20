@@ -574,7 +574,7 @@ public class BlockUtils
             {
                 for( int y=minY; y<=maxY; y++ )
                 {
-                    if( Block.blocksList[world.getBlockId( x, y, z )] != null )
+                    if( world.getBlockId( x, y, z ) != 0 )
                     {
                         out.add( new ChunkCoordinates( x, y, z ) );
                     }
