@@ -110,6 +110,64 @@ public class BlockUtils
 		public abstract void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i );
 	}
 	
+	public static enum UpdateRules
+	{
+		UpdateNeighbors( true, false ),
+		UpdateNetwork( false, true ),
+		UpdateNeighborsAndNetwork( true, true ),
+		UpdateNoOne( false, false );
+		
+		private boolean m_updateNeighbors;
+		private boolean m_updateNetwork;
+		
+		private UpdateRules( boolean updateNeighbors, boolean updateNetwork )
+		{
+			m_updateNeighbors = updateNeighbors;
+			m_updateNetwork = updateNetwork;
+		}
+		
+		public boolean shouldUpdateNeighbors( )
+		{
+			return m_updateNeighbors;
+		}
+		
+		public boolean shouldUpdateNetwork( )
+		{
+			return m_updateNetwork;
+		}
+	}
+	
+	private static Field m_chunkPrecipitationHeightMapField;
+	private static Field m_chunkHeightMapField;
+	private static Field m_chunkStorageArraysField;
+	private static Field m_chunkIsModifiedField;
+	private static Method m_chunkRelightBlockMethod;
+	private static Method m_chunkPropagateSkylightOcclusionMethod;
+	
+	static
+	{
+		try
+		{
+			// use reflection to get access to Chunk internals
+			m_chunkPrecipitationHeightMapField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "precipitationHeightMap", "field_76638_b" ) );
+			m_chunkPrecipitationHeightMapField.setAccessible( true );
+			m_chunkHeightMapField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "heightMap", "field_76634_f" ) );
+			m_chunkHeightMapField.setAccessible( true );
+			m_chunkStorageArraysField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "storageArrays", "field_76652_q" ) );
+			m_chunkStorageArraysField.setAccessible( true );
+			m_chunkIsModifiedField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "isModified", "field_76643_l" ) );
+			m_chunkIsModifiedField.setAccessible( true );
+			m_chunkRelightBlockMethod = Chunk.class.getDeclaredMethod( RuntimeMapping.getRuntimeName( "relightBlock", "func_76615_h" ), int.class, int.class, int.class );
+			m_chunkRelightBlockMethod.setAccessible( true );
+			m_chunkPropagateSkylightOcclusionMethod = Chunk.class.getDeclaredMethod( RuntimeMapping.getRuntimeName( "propagateSkylightOcclusion", "func_76595_e" ), int.class, int.class );
+			m_chunkPropagateSkylightOcclusionMethod.setAccessible( true );
+		}
+		catch( NoSuchFieldException | NoSuchMethodException | SecurityException ex )
+		{
+			throw new Error( ex );
+		}
+	}
+	
 	public static interface BlockValidator
 	{
 		public boolean isValid( ChunkCoordinates coords );
@@ -393,20 +451,20 @@ public class BlockUtils
 	
 	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z )
 	{
-		return removeBlockWithoutNotifyingIt( world, x, y, z, true );
+		return removeBlockWithoutNotifyingIt( world, x, y, z, UpdateRules.UpdateNeighborsAndNetwork );
 	}
 	
-	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z, boolean sendNotifications )
+	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z, UpdateRules updateRules )
 	{
-		return changeBlockWithoutNotifyingIt( world, x, y, z, 0, 0, sendNotifications );
+		return changeBlockWithoutNotifyingIt( world, x, y, z, 0, 0, updateRules );
 	}
 	
 	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta )
 	{
-		return changeBlockWithoutNotifyingIt( world, x, y, z, targetBlockId, targetBlockMeta, true );
+		return changeBlockWithoutNotifyingIt( world, x, y, z, targetBlockId, targetBlockMeta, UpdateRules.UpdateNeighborsAndNetwork );
 	}
 	
-	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta, boolean sendNotifications )
+	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta, UpdateRules updateRules )
 	{
 		// NOTE: this method emulates Chunk.setBlockIDWithMetadata()
 		
@@ -432,24 +490,11 @@ public class BlockUtils
 				return false;
 			}
 			
-			// use reflection to get access to Chunk internals
-			Field chunkPrecipitationHeightMapField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "precipitationHeightMap", "field_76638_b" ) );
-			chunkPrecipitationHeightMapField.setAccessible( true );
-			Field chunkHeightMapField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "heightMap", "field_76634_f" ) );
-			chunkHeightMapField.setAccessible( true );
-			Field chunkStorageArraysField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "storageArrays", "field_76652_q" ) );
-			chunkStorageArraysField.setAccessible( true );
-			ExtendedBlockStorage[] storageArrays = (ExtendedBlockStorage[])chunkStorageArraysField.get( chunk );
-			Field chunkIsModifiedField = Chunk.class.getDeclaredField( RuntimeMapping.getRuntimeName( "isModified", "field_76643_l" ) );
-			chunkIsModifiedField.setAccessible( true );
-			Method chunkRelightBlockMethod = Chunk.class.getDeclaredMethod( RuntimeMapping.getRuntimeName( "relightBlock", "func_76615_h" ), int.class, int.class, int.class );
-			chunkRelightBlockMethod.setAccessible( true );
-			Method chunkPropagateSkylightOcclusionMethod = Chunk.class.getDeclaredMethod( RuntimeMapping.getRuntimeName( "propagateSkylightOcclusion", "func_76595_e" ), int.class, int.class );
-			chunkPropagateSkylightOcclusionMethod.setAccessible( true );
+			ExtendedBlockStorage[] storageArrays = (ExtendedBlockStorage[])m_chunkStorageArraysField.get( chunk );
 			
 			// get chunk field values
-			int[] precipitationHeightMap = (int[])chunkPrecipitationHeightMapField.get( chunk );
-			int[] heightMap = (int[])chunkHeightMapField.get( chunk );
+			int[] precipitationHeightMap = (int[])m_chunkPrecipitationHeightMapField.get( chunk );
+			int[] heightMap = (int[])m_chunkHeightMapField.get( chunk );
 			
 			// update rain map
 			int heightMapIndex = mz << 4 | mx;
@@ -486,51 +531,31 @@ public class BlockUtils
 			{
 				if( y >= height )
 				{
-					chunkRelightBlockMethod.invoke( chunk, mx, y + 1, mz );
+					m_chunkRelightBlockMethod.invoke( chunk, mx, y + 1, mz );
 				}
 			}
 			else if( y == height - 1 )
 			{
-				chunkRelightBlockMethod.invoke( chunk, mx, y, mz );
+				m_chunkRelightBlockMethod.invoke( chunk, mx, y, mz );
 			}
-			chunkPropagateSkylightOcclusionMethod.invoke( chunk, mx, mz );
+			m_chunkPropagateSkylightOcclusionMethod.invoke( chunk, mx, mz );
 			
 			// make the chunk dirty
-			chunkIsModifiedField.setBoolean( chunk, true );
+			m_chunkIsModifiedField.setBoolean( chunk, true );
 			
 			// handle block updates
-			if( sendNotifications )
+			if( updateRules.shouldUpdateNeighbors() && !world.isRemote )
+			{
+                world.notifyBlockChange( x, y, z, oldBlockId );
+			}
+			if( updateRules.shouldUpdateNetwork() )
 			{
 				world.markBlockForUpdate( x, y, z );
-	            if( !world.isRemote )
-	            {
-	                world.notifyBlockChange( x, y, z, oldBlockId );
-	            }
 			}
 			
 			return true;
 		}
-		catch( NoSuchFieldException ex )
-		{
-			throw new Error( "Unable to remove block! Chunk class has changed!", ex );
-		}
-		catch( NoSuchMethodException ex )
-		{
-			throw new Error( "Unable to remove block! Chunk class has changed!", ex );
-		}
-		catch( IllegalAccessException ex )
-		{
-			throw new Error( "Unable to remove block! Access to Chunk instance was denied!", ex );
-		}
-		catch( SecurityException ex )
-		{
-			throw new Error( "Unable to remove block! Access to Chunk instance was denied!", ex );
-		}
-		catch( IllegalArgumentException ex )
-		{
-			throw new Error( "Unable to remove block! Chunk method has changed!", ex );
-		}
-		catch( InvocationTargetException ex )
+		catch( IllegalAccessException | SecurityException | IllegalArgumentException | InvocationTargetException ex )
 		{
 			throw new Error( "Unable to remove block! Chunk method call failed!", ex );
 		}
