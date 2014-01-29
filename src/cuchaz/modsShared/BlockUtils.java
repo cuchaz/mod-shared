@@ -113,17 +113,17 @@ public class BlockUtils
 	public static enum UpdateRules
 	{
 		UpdateNeighbors( true, false ),
-		UpdateNetwork( false, true ),
-		UpdateNeighborsAndNetwork( true, true ),
+		UpdateClients( false, true ),
+		UpdateNeighborsAndClients( true, true ),
 		UpdateNoOne( false, false );
 		
 		private boolean m_updateNeighbors;
-		private boolean m_updateNetwork;
+		private boolean m_updateClients;
 		
-		private UpdateRules( boolean updateNeighbors, boolean updateNetwork )
+		private UpdateRules( boolean updateNeighbors, boolean updateClients )
 		{
 			m_updateNeighbors = updateNeighbors;
-			m_updateNetwork = updateNetwork;
+			m_updateClients = updateClients;
 		}
 		
 		public boolean shouldUpdateNeighbors( )
@@ -131,9 +131,9 @@ public class BlockUtils
 			return m_updateNeighbors;
 		}
 		
-		public boolean shouldUpdateNetwork( )
+		public boolean shouldUpdateClients( )
 		{
-			return m_updateNetwork;
+			return m_updateClients;
 		}
 	}
 	
@@ -451,7 +451,7 @@ public class BlockUtils
 	
 	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z )
 	{
-		return removeBlockWithoutNotifyingIt( world, x, y, z, UpdateRules.UpdateNeighborsAndNetwork );
+		return removeBlockWithoutNotifyingIt( world, x, y, z, UpdateRules.UpdateNeighborsAndClients );
 	}
 	
 	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z, UpdateRules updateRules )
@@ -461,7 +461,7 @@ public class BlockUtils
 	
 	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta )
 	{
-		return changeBlockWithoutNotifyingIt( world, x, y, z, targetBlockId, targetBlockMeta, UpdateRules.UpdateNeighborsAndNetwork );
+		return changeBlockWithoutNotifyingIt( world, x, y, z, targetBlockId, targetBlockMeta, UpdateRules.UpdateNeighborsAndClients );
 	}
 	
 	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta, UpdateRules updateRules )
@@ -548,7 +548,7 @@ public class BlockUtils
 			{
                 world.notifyBlockChange( x, y, z, oldBlockId );
 			}
-			if( updateRules.shouldUpdateNetwork() )
+			if( updateRules.shouldUpdateClients() )
 			{
 				world.markBlockForUpdate( x, y, z );
 			}
