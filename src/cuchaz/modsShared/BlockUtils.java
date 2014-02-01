@@ -138,6 +138,27 @@ public class BlockUtils
 		}
 	}
 	
+	public static enum SearchAction
+	{
+		AbortSearch,
+		ContinueSearching;
+	}
+
+	public static interface BlockExplorer
+	{
+		public boolean shouldExploreBlock( ChunkCoordinates coords );
+	}
+	
+	public static interface BlockCallback
+	{
+		public SearchAction foundBlock( ChunkCoordinates coords );
+	}
+	
+	public static interface BlockConditionChecker
+	{
+		public boolean isConditionMet( ChunkCoordinates coords );
+	}
+	
 	private static Field m_chunkPrecipitationHeightMapField;
 	private static Field m_chunkHeightMapField;
 	private static Field m_chunkStorageArraysField;
@@ -167,16 +188,6 @@ public class BlockUtils
 		{
 			throw new Error( ex );
 		}
-	}
-	
-	public static interface BlockValidator
-	{
-		public boolean isValid( ChunkCoordinates coords );
-	}
-	
-	public static interface BlockConditionValidator extends BlockValidator
-	{
-		public boolean isConditionMet( ChunkCoordinates coords );
 	}
 	
 	public static int getManhattanDistance( ChunkCoordinates a, ChunkCoordinates b )
@@ -219,148 +230,113 @@ public class BlockUtils
 		return Math.abs( ax - bx ) + Math.abs( az - bz );
 	}
 	
-	public static List<ChunkCoordinates> searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockValidator validator, Neighbors neighbors )
+	public static List<ChunkCoordinates> searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockExplorer validator, Neighbors neighbors )
 	{
 		return searchForBlocks( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator, neighbors );
 	}
 	
-	public static List<ChunkCoordinates> searchForBlocks( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockValidator validator, Neighbors neighbors )
+	public static List<ChunkCoordinates> searchForBlocks( final ChunkCoordinates source, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
 	{
-		// do BFS to find valid blocks starting at the source block
-		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
-		queue.add( sourceBlock );
-		TreeSet<ChunkCoordinates> visitedBlocks = new TreeSet<ChunkCoordinates>();
-		List<ChunkCoordinates> foundBlocks = new ArrayList<ChunkCoordinates>();
-		
-		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
-		while( !queue.isEmpty() )
-		{
-			// get the block and visit it
-			ChunkCoordinates block = queue.iterator().next();
-			queue.remove( block );
-			visitedBlocks.add( block );
-			
-			// this is a target block! Add it to the list (as long as it's not the source block)
-			if( !block.equals( sourceBlock ) )
+		final List<ChunkCoordinates> foundBlocks = new ArrayList<ChunkCoordinates>();
+		exploreBlocks(
+			source,
+			maxNumBlocks,
+			new BlockCallback( )
 			{
-				// check for the fail-safe
-				if( foundBlocks.size() >= maxNumBlocks )
+				@Override
+				public SearchAction foundBlock( ChunkCoordinates coords )
 				{
-					return null;
+					if( !coords.equals( source ) )
+					{
+						foundBlocks.add( coords );
+					}
+					return SearchAction.ContinueSearching;
 				}
-				
-				foundBlocks.add( block );
-			}
-			
-			// check the block's neighbors
-			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
-			{
-				neighbors.getNeighbor( neighborCoords, block, i );
-				if( isValidNeighbor( neighborCoords, validator, queue, visitedBlocks ) )
-				{
-					queue.add( new ChunkCoordinates( neighborCoords ) );
-				}
-			}
-		}
-		
+			},
+			explorer,
+			neighbors
+		);
 		return foundBlocks;
 	}
 	
-	public static Boolean searchForCondition( int x, int y, int z, int maxNumBlocks, BlockConditionValidator validator, Neighbors neighbors )
+	public static Boolean searchForCondition( int x, int y, int z, int maxNumBlocks, BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
 	{
-		return searchForCondition( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator, neighbors );
+		return searchForCondition( new ChunkCoordinates( x, y, z ), maxNumBlocks, checker, explorer, neighbors );
 	}
 	
-	public static Boolean searchForCondition( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockConditionValidator validator, Neighbors neighbors )
+	public static Boolean searchForCondition( ChunkCoordinates source, int maxNumBlocks, final BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
+	{
+		return searchForBlock( source, maxNumBlocks, checker, explorer, neighbors ) != null;
+	}
+	
+	public static ChunkCoordinates searchForBlock( int x, int y, int z, int maxNumBlocks, BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
+	{
+		return searchForBlock( new ChunkCoordinates( x, y, z ), maxNumBlocks, checker, explorer, neighbors );
+	}
+	
+	public static ChunkCoordinates searchForBlock( final ChunkCoordinates source, int maxNumBlocks, final BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
+	{
+		final ChunkCoordinates[] outCoords = { null };
+		exploreBlocks(
+			source,
+			maxNumBlocks,
+			new BlockCallback( )
+			{
+				@Override
+				public SearchAction foundBlock( ChunkCoordinates coords )
+				{
+					// is this our target block?
+					if( !coords.equals( source ) && checker.isConditionMet( coords ) )
+					{
+						outCoords[0] = coords;
+						return SearchAction.AbortSearch;
+					}
+					
+					return SearchAction.ContinueSearching;
+				}
+			},
+			explorer,
+			neighbors
+		);
+		return outCoords[0];
+	}
+	
+	public static void exploreBlocks( ChunkCoordinates source, int maxNumBlocks, BlockCallback callback, BlockExplorer explorer, Neighbors neighbors )
 	{
 		// do BFS to find valid blocks starting at the source block
 		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
-		queue.add( sourceBlock );
+		queue.add( source );
 		TreeSet<ChunkCoordinates> visitedBlocks = new TreeSet<ChunkCoordinates>();
 		
 		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
 		while( !queue.isEmpty() )
 		{
 			// get the block and visit it
-			ChunkCoordinates block = queue.iterator().next();
-			queue.remove( block );
-			visitedBlocks.add( block );
+			ChunkCoordinates coords = queue.iterator().next();
+			queue.remove( coords );
+			visitedBlocks.add( coords );
 			
-			// check for the fail-safe
-			if( visitedBlocks.size() > maxNumBlocks )
+			// report the block
+			if( callback.foundBlock( coords ) == SearchAction.AbortSearch )
 			{
-				return null;
-			}
-			
-			// check for the condition
-			if( validator.isConditionMet( block ) )
-			{
-				return true;
+				break;
 			}
 			
 			// check the block's neighbors
 			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
 			{
-				neighbors.getNeighbor( neighborCoords, block, i );
-				if( isValidNeighbor( neighborCoords, validator, queue, visitedBlocks ) )
+				neighbors.getNeighbor( neighborCoords, coords, i );
+				if( isValidNeighbor( neighborCoords, explorer, queue, visitedBlocks ) )
 				{
 					queue.add( new ChunkCoordinates( neighborCoords ) );
 				}
 			}
 		}
-		
-		return false;
 	}
 	
-	public static ChunkCoordinates searchForBlock( int x, int y, int z, int maxNumBlocks, BlockConditionValidator validator, Neighbors neighbors )
+	private static boolean isValidNeighbor( ChunkCoordinates coords, BlockExplorer explorer, Set<ChunkCoordinates> queue, Set<ChunkCoordinates> visitedBlocks )
 	{
-		return searchForBlock( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator, neighbors );
-	}
-	
-	public static ChunkCoordinates searchForBlock( ChunkCoordinates sourceBlock, int maxNumBlocks, BlockConditionValidator validator, Neighbors neighbors )
-	{
-		// do BFS to find the first valid block starting at the source block
-		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
-		queue.add( sourceBlock );
-		TreeSet<ChunkCoordinates> visitedBlocks = new TreeSet<ChunkCoordinates>();
-		
-		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
-		while( !queue.isEmpty() )
-		{
-			// get the block and visit it
-			ChunkCoordinates block = queue.iterator().next();
-			queue.remove( block );
-			visitedBlocks.add( block );
-			
-			// is this our target block?
-			if( !block.equals( sourceBlock ) && validator.isConditionMet( block ) )
-			{
-				return block;
-			}
-			
-			// check the block cap
-			if( visitedBlocks.size() >= maxNumBlocks )
-			{
-				return null;
-			}
-			
-			// check the block's neighbors
-			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
-			{
-				neighbors.getNeighbor( neighborCoords, block, i );
-				if( isValidNeighbor( neighborCoords, validator, queue, visitedBlocks ) )
-				{
-					queue.add( new ChunkCoordinates( neighborCoords ) );
-				}
-			}
-		}
-		
-		return null;
-	}
-	
-	private static boolean isValidNeighbor( ChunkCoordinates coords, BlockValidator validator, Set<ChunkCoordinates> queue, Set<ChunkCoordinates> visitedBlocks )
-	{
-		return validator.isValid( coords )
+		return explorer.shouldExploreBlock( coords )
 			&& !visitedBlocks.contains( coords )
 			&& !queue.contains( coords );
 	}
@@ -378,10 +354,10 @@ public class BlockUtils
 			TreeSet<ChunkCoordinates> component = new TreeSet<ChunkCoordinates>( BlockUtils.searchForBlocks(
 				coords,
 				remainingBlocks.size(),
-				new BlockValidator( )
+				new BlockExplorer( )
 				{
 					@Override
-					public boolean isValid( ChunkCoordinates coords )
+					public boolean shouldExploreBlock( ChunkCoordinates coords )
 					{
 						return remainingBlocks.contains( coords );
 					}
@@ -429,10 +405,10 @@ public class BlockUtils
 		List<ChunkCoordinates> holeBlocks = BlockUtils.searchForBlocks(
 			sourceBlock,
 			volume,
-			new BlockValidator( )
+			new BlockExplorer( )
 			{
 				@Override
-				public boolean isValid( ChunkCoordinates coords )
+				public boolean shouldExploreBlock( ChunkCoordinates coords )
 				{
 					return !blocks.contains( coords ) && ( yMax == null || coords.posY <= yMax );
 				}
