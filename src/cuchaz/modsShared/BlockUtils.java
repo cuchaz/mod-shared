@@ -322,6 +322,12 @@ public class BlockUtils
 				break;
 			}
 			
+			// check the cap
+			if( visitedBlocks.size() >= maxNumBlocks )
+			{
+				break;
+			}
+			
 			// check the block's neighbors
 			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
 			{
