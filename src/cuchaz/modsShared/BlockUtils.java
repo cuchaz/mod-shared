@@ -230,9 +230,9 @@ public class BlockUtils
 		return Math.abs( ax - bx ) + Math.abs( az - bz );
 	}
 	
-	public static List<ChunkCoordinates> searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockExplorer validator, Neighbors neighbors )
+	public static List<ChunkCoordinates> searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
 	{
-		return searchForBlocks( new ChunkCoordinates( x, y, z ), maxNumBlocks, validator, neighbors );
+		return searchForBlocks( new ChunkCoordinates( x, y, z ), maxNumBlocks, explorer, neighbors );
 	}
 	
 	public static List<ChunkCoordinates> searchForBlocks( final ChunkCoordinates source, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
