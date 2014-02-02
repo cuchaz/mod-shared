@@ -25,7 +25,7 @@ public class EntityUtils
 		
 		return player.worldObj.getWorldVec3Pool().getVecFromPool(
 			player.posX,
-			player.posY + ( player.worldObj.isRemote ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight() ),
+			player.posY + ( Environment.isClient() ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight() ),
 			player.posZ
 		);
 	}
