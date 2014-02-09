@@ -184,7 +184,15 @@ public class BlockUtils
 			m_chunkPropagateSkylightOcclusionMethod = Chunk.class.getDeclaredMethod( Environment.getRuntimeName( "propagateSkylightOcclusion", "func_76595_e" ), int.class, int.class );
 			m_chunkPropagateSkylightOcclusionMethod.setAccessible( true );
 		}
-		catch( NoSuchFieldException | NoSuchMethodException | SecurityException ex )
+		catch( NoSuchFieldException ex )
+		{
+			throw new Error( ex );
+		}
+		catch( SecurityException ex )
+		{
+			throw new Error( ex );
+		}
+		catch( NoSuchMethodException ex )
 		{
 			throw new Error( ex );
 		}
@@ -538,7 +546,20 @@ public class BlockUtils
 			
 			return true;
 		}
-		catch( IllegalAccessException | SecurityException | IllegalArgumentException | InvocationTargetException ex )
+		// can't use Java 7 because of Mac users... *grumble* *grumble*
+		catch( IllegalAccessException ex )
+		{
+			throw new Error( "Unable to remove block! Chunk method call failed!", ex );
+		}
+		catch( SecurityException ex )
+		{
+			throw new Error( "Unable to remove block! Chunk method call failed!", ex );
+		}
+		catch( IllegalArgumentException ex )
+		{
+			throw new Error( "Unable to remove block! Chunk method call failed!", ex );
+		}
+		catch( InvocationTargetException ex )
 		{
 			throw new Error( "Unable to remove block! Chunk method call failed!", ex );
 		}
