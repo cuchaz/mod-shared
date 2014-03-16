@@ -13,9 +13,10 @@ package cuchaz.modsShared;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -311,27 +312,30 @@ public class BlockUtils
 	
 	public static void exploreBlocks( ChunkCoordinates source, int maxNumBlocks, BlockCallback callback, BlockExplorer explorer, Neighbors neighbors )
 	{
-		// do BFS to find valid blocks starting at the source block
-		LinkedHashSet<ChunkCoordinates> queue = new LinkedHashSet<ChunkCoordinates>();
-		queue.add( source );
+		// TEMP
+		Profiler.start( "exploreBlocks" );
+		
+		Deque<ChunkCoordinates> queue = new ArrayDeque<ChunkCoordinates>();
 		TreeSet<ChunkCoordinates> visitedBlocks = new TreeSet<ChunkCoordinates>();
+		
+		// do BFS to find valid blocks starting at the source block
+		queue.add( source );
+		visitedBlocks.add( source );
 		
 		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
 		while( !queue.isEmpty() )
 		{
-			// get the block and visit it
-			ChunkCoordinates coords = queue.iterator().next();
-			queue.remove( coords );
-			visitedBlocks.add( coords );
-			
-			// report the block
-			if( callback.foundBlock( coords ) == SearchAction.AbortSearch )
+			// check the cap
+			if( visitedBlocks.size() > maxNumBlocks )
 			{
 				break;
 			}
 			
-			// check the cap
-			if( visitedBlocks.size() >= maxNumBlocks )
+			// get the next block
+			ChunkCoordinates coords = queue.poll();
+			
+			// report the block
+			if( callback.foundBlock( coords ) == SearchAction.AbortSearch )
 			{
 				break;
 			}
@@ -340,19 +344,20 @@ public class BlockUtils
 			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
 			{
 				neighbors.getNeighbor( neighborCoords, coords, i );
-				if( isValidNeighbor( neighborCoords, explorer, queue, visitedBlocks ) )
+				if( !visitedBlocks.contains( neighborCoords ) )
 				{
-					queue.add( new ChunkCoordinates( neighborCoords ) );
+					if( explorer.shouldExploreBlock( neighborCoords ) )
+					{
+						ChunkCoordinates coordsToAdd = new ChunkCoordinates( neighborCoords );
+						visitedBlocks.add( coordsToAdd );
+						queue.add( coordsToAdd );
+					}
 				}
 			}
 		}
-	}
-	
-	private static boolean isValidNeighbor( ChunkCoordinates coords, BlockExplorer explorer, Set<ChunkCoordinates> queue, Set<ChunkCoordinates> visitedBlocks )
-	{
-		return explorer.shouldExploreBlock( coords )
-			&& !visitedBlocks.contains( coords )
-			&& !queue.contains( coords );
+		
+		// TEMP
+		Profiler.stop( "exploreBlocks" );
 	}
 	
 	public static List<TreeSet<ChunkCoordinates>> getConnectedComponents( Set<ChunkCoordinates> blocks, Neighbors neighbors )
