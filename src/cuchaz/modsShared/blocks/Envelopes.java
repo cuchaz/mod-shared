@@ -8,11 +8,12 @@
  * Contributors:
  *     Jeff Martin - initial API and implementation
  ******************************************************************************/
-package cuchaz.modsShared;
+package cuchaz.modsShared.blocks;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
 
 import net.minecraft.util.ChunkCoordinates;
 

@@ -8,7 +8,7 @@
  * Contributors:
  *     Jeff Martin - initial API and implementation
  ******************************************************************************/
-package cuchaz.modsShared;
+package cuchaz.modsShared.perf;
 
 public class Timer
 {

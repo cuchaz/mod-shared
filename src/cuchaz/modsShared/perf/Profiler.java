@@ -8,7 +8,7 @@
  * Contributors:
  *     Jeff Martin - initial API and implementation
  ******************************************************************************/
-package cuchaz.modsShared;
+package cuchaz.modsShared.perf;
 
 import java.util.HashMap;
 import java.util.PriorityQueue;

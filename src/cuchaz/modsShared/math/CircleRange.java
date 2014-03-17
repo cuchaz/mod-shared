@@ -8,14 +8,14 @@
  * Contributors:
  *     Jeff Martin - initial API and implementation
  ******************************************************************************/
-package cuchaz.modsShared;
+package cuchaz.modsShared.math;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import cuchaz.modsShared.HashCalculator;
-import cuchaz.modsShared.CompareReal;
+import cuchaz.modsShared.math.CompareReal;
+import cuchaz.modsShared.math.HashCalculator;
 
 public class CircleRange implements Comparable<CircleRange>, Serializable
 {

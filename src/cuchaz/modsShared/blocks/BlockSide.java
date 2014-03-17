@@ -8,8 +8,10 @@
  * Contributors:
  *     Jeff Martin - initial API and implementation
  ******************************************************************************/
-package cuchaz.modsShared;
+package cuchaz.modsShared.blocks;
 
+import cuchaz.modsShared.math.BoxCorner;
+import cuchaz.modsShared.math.CircleRange;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.util.ChunkCoordinates;

@@ -8,7 +8,7 @@
  * Contributors:
  *     Jeff Martin - initial API and implementation
  ******************************************************************************/
-package cuchaz.modsShared;
+package cuchaz.modsShared.blocks;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
@@ -29,6 +27,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import cuchaz.modsShared.Environment;
+import cuchaz.modsShared.Log;
+import cuchaz.modsShared.perf.Profiler;
 
 public class BlockUtils
 {
@@ -239,14 +240,14 @@ public class BlockUtils
 		return Math.abs( ax - bx ) + Math.abs( az - bz );
 	}
 	
-	public static List<ChunkCoordinates> searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
+	public static BlockSet searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
 	{
 		return searchForBlocks( new ChunkCoordinates( x, y, z ), maxNumBlocks, explorer, neighbors );
 	}
 	
-	public static List<ChunkCoordinates> searchForBlocks( final ChunkCoordinates source, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
+	public static BlockSet searchForBlocks( final ChunkCoordinates source, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
 	{
-		final List<ChunkCoordinates> foundBlocks = new ArrayList<ChunkCoordinates>();
+		final BlockSet foundBlocks = new BlockSet();
 		exploreBlocks(
 			source,
 			maxNumBlocks,
@@ -316,7 +317,7 @@ public class BlockUtils
 		Profiler.start( "exploreBlocks" );
 		
 		Deque<ChunkCoordinates> queue = new ArrayDeque<ChunkCoordinates>();
-		TreeSet<ChunkCoordinates> visitedBlocks = new TreeSet<ChunkCoordinates>();
+		BlockSet visitedBlocks = new BlockSet();
 		
 		// do BFS to find valid blocks starting at the source block
 		queue.add( source );
@@ -360,17 +361,17 @@ public class BlockUtils
 		Profiler.stop( "exploreBlocks" );
 	}
 	
-	public static List<TreeSet<ChunkCoordinates>> getConnectedComponents( Set<ChunkCoordinates> blocks, Neighbors neighbors )
+	public static List<BlockSet> getConnectedComponents( BlockSet blocks, Neighbors neighbors )
 	{
-		List<TreeSet<ChunkCoordinates>> components = new ArrayList<TreeSet<ChunkCoordinates>>();
-		final TreeSet<ChunkCoordinates> remainingBlocks = new TreeSet<ChunkCoordinates>( blocks );
+		List<BlockSet> components = new ArrayList<BlockSet>();
+		final BlockSet remainingBlocks = new BlockSet( blocks );
 		while( !remainingBlocks.isEmpty() )
 		{
 			// get a block
 			ChunkCoordinates coords = remainingBlocks.first();
 			
 			// do BFS from this block to find the connected component
-			TreeSet<ChunkCoordinates> component = new TreeSet<ChunkCoordinates>( BlockUtils.searchForBlocks(
+			BlockSet component = new BlockSet( BlockUtils.searchForBlocks(
 				coords,
 				remainingBlocks.size(),
 				new BlockExplorer( )
@@ -393,11 +394,11 @@ public class BlockUtils
 		return components;
 	}
 	
-	public static TreeSet<ChunkCoordinates> getBlocksAtYAndBelow( Set<ChunkCoordinates> inBlocks, int y )
+	public static BlockSet getBlocksAtYAndBelow( BlockSet inBlocks, int y )
 	{
 		// UNDONE: this could be optimized if we could answer y= queries efficiently
 		
-		TreeSet<ChunkCoordinates> outBlocks = new TreeSet<ChunkCoordinates>();
+		BlockSet outBlocks = new BlockSet();
 		for( ChunkCoordinates coords : inBlocks )
 		{
 			if( coords.posY <= y )
@@ -408,12 +409,12 @@ public class BlockUtils
 		return outBlocks;
 	}
 	
-	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, Neighbors neighbors )
+	public static BlockSet getHoleFromInnerBoundary( BlockSet innerBoundary, final BlockSet blocks, Neighbors neighbors )
 	{
 		return getHoleFromInnerBoundary( innerBoundary, blocks, neighbors, null );
 	}
 	
-	public static TreeSet<ChunkCoordinates> getHoleFromInnerBoundary( Set<ChunkCoordinates> innerBoundary, final Set<ChunkCoordinates> blocks, Neighbors neighbors, final Integer yMax )
+	public static BlockSet getHoleFromInnerBoundary( BlockSet innerBoundary, final BlockSet blocks, Neighbors neighbors, final Integer yMax )
 	{
 		// get the number of blocks inside the shell to use as an upper bound
 		BoundingBoxInt box = new BoundingBoxInt( blocks );
@@ -421,7 +422,7 @@ public class BlockUtils
 		
 		// use BFS to find the enclosed blocks (including the boundary)
 		ChunkCoordinates sourceBlock = innerBoundary.iterator().next();
-		List<ChunkCoordinates> holeBlocks = BlockUtils.searchForBlocks(
+		BlockSet holeBlocks = BlockUtils.searchForBlocks(
 			sourceBlock,
 			volume,
 			new BlockExplorer( )
@@ -442,7 +443,7 @@ public class BlockUtils
 		}
 		
 		holeBlocks.add( sourceBlock );
-		return new TreeSet<ChunkCoordinates>( holeBlocks );
+		return new BlockSet( holeBlocks );
 	}
 	
 	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z )

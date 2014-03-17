@@ -8,7 +8,7 @@
  * Contributors:
  *     Jeff Martin - initial API and implementation
  ******************************************************************************/
-package cuchaz.modsShared;
+package cuchaz.modsShared.math;
 
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
