@@ -10,13 +10,9 @@
  ******************************************************************************/
 package cuchaz.modsShared.blocks;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import net.minecraft.util.ChunkCoordinates;
 
-public class BlockArray implements Iterable<ChunkCoordinates>
+public class BlockArray
 {
 	public static enum Rotation
 	{
@@ -115,11 +111,9 @@ public class BlockArray implements Iterable<ChunkCoordinates>
 		return new BlockArray( m_uMin, m_vMin, getWidth(), getHeight() );
 	}
 
-	@Override
-	public Iterator<ChunkCoordinates> iterator( )
+	public BlockSet toBlockSet( )
 	{
-		// collect the blocks into a list
-		List<ChunkCoordinates> blocks = new ArrayList<ChunkCoordinates>();
+		BlockSet blocks = new BlockSet();
 		for( int u=0; u<getWidth(); u++ )
 		{
 			for( int v=0; v<getHeight(); v++ )
@@ -130,6 +124,6 @@ public class BlockArray implements Iterable<ChunkCoordinates>
 				}
 			}
 		}
-		return blocks.iterator();
+		return blocks;
 	}
 }

@@ -23,8 +23,7 @@ public class DelayTimer
 	
 	public boolean isDelayedUpdate( )
 	{
-		boolean isDelay = m_timer == 0;
 		m_timer = ( m_timer + 1 ) % m_numTicks;
-		return isDelay;
+		return m_timer == 0;
 	}
 }
