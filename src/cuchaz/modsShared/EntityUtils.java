@@ -10,7 +10,10 @@
  ******************************************************************************/
 package cuchaz.modsShared;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
@@ -50,5 +53,20 @@ public class EntityUtils
 			sinPitch,
 			cosYaw * -cosPitch
 		);
+	}
+	
+	public static double getPlayerReachDistance( EntityPlayer player )
+	{
+		if( player instanceof EntityPlayerMP )
+		{
+			return ((EntityPlayerMP)player).theItemInWorldManager.getBlockReachDistance();
+		}
+		else if( player instanceof AbstractClientPlayer )
+		{
+			return Minecraft.getMinecraft().playerController.getBlockReachDistance();
+		}
+		
+		Log.logger.warning( "Unable to determine reach distance for player!" );
+		return 0;
 	}
 }
