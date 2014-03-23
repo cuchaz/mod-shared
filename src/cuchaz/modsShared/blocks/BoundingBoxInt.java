@@ -12,6 +12,7 @@ package cuchaz.modsShared.blocks;
 
 import java.util.Set;
 
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 
 public class BoundingBoxInt
@@ -94,5 +95,15 @@ public class BoundingBoxInt
 	public int getVolume( )
 	{
 		return getDx()*getDy()*getDz();
+	}
+	
+	public void toAxisAlignedBB( AxisAlignedBB out )
+	{
+		out.minX = minX;
+		out.minY = minY;
+		out.minZ = minZ;
+		out.maxX = maxX;
+		out.maxY = maxY;
+		out.maxZ = maxZ;
 	}
 }
