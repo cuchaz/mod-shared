@@ -10,47 +10,43 @@
  ******************************************************************************/
 package cuchaz.modsShared.blocks;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 
-
 public class BlockSetHeightIndex
 {
-	private Map<Integer,List<BlockSet>> m_map;
+	private Map<Integer,BlockSet> m_layers;
 	
-	public BlockSetHeightIndex( Iterable<BlockSet> sets )
+	public BlockSetHeightIndex()
 	{
-		m_map = new TreeMap<Integer,List<BlockSet>>();
-		for( BlockSet set : sets )
+		m_layers = new TreeMap<Integer,BlockSet>();
+	}
+	
+	public BlockSetHeightIndex( BlockSet blocks )
+	{
+		this();
+		add( blocks );
+	}
+	
+	public void add( BlockSet blocks )
+	{
+		for( Coords coords : blocks )
 		{
-			// get the min y of the set
-			int minY = new BoundingBoxInt( set ).minY;
-			addSet( minY, set );
+			// is there a layer at this y yet?
+			BlockSet layer = m_layers.get( coords.y );
+			if( layer == null )
+			{
+				layer = new BlockSet();
+				m_layers.put( coords.y, layer );
+			}
+			
+			layer.add( coords );
 		}
 	}
 	
-	public List<BlockSet> getByMinY( int minY )
+	public BlockSet get( int y )
 	{
-		List<BlockSet> blocks = m_map.get( minY );
-		if( blocks == null )
-		{
-			blocks = new ArrayList<BlockSet>();
-		}
-		return blocks;
-	}
-	
-	private void addSet( int minY, BlockSet set )
-	{
-		// does this y have a list already?
-		List<BlockSet> level = m_map.get( minY );
-		if( level == null )
-		{
-			level = new ArrayList<BlockSet>();
-			m_map.put( minY, level );
-		}
-		level.add( set );
+		return m_layers.get( y );
 	}
 }

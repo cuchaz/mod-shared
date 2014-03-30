@@ -14,7 +14,6 @@ import cuchaz.modsShared.math.BoxCorner;
 import cuchaz.modsShared.math.CircleRange;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Icon;
 import net.minecraft.util.MathHelper;
 
@@ -55,9 +54,9 @@ public enum BlockSide
 		}
 		
 		@Override
-		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		public boolean isMoreExtremal( Coords compareWith, Coords compareTo )
 		{
-			return compareWith.posY < compareTo.posY;
+			return compareWith.y < compareTo.y;
 		}
 
 		@Override
@@ -100,9 +99,9 @@ public enum BlockSide
 		}
 		
 		@Override
-		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		public boolean isMoreExtremal( Coords compareWith, Coords compareTo )
 		{
-			return compareWith.posY > compareTo.posY;
+			return compareWith.y > compareTo.y;
 		}
 
 		@Override
@@ -145,9 +144,9 @@ public enum BlockSide
 		}
 		
 		@Override
-		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		public boolean isMoreExtremal( Coords compareWith, Coords compareTo )
 		{
-			return compareWith.posZ < compareTo.posZ;
+			return compareWith.z < compareTo.z;
 		}
 
 		@Override
@@ -190,9 +189,9 @@ public enum BlockSide
 		}
 		
 		@Override
-		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		public boolean isMoreExtremal( Coords compareWith, Coords compareTo )
 		{
-			return compareWith.posZ > compareTo.posZ;
+			return compareWith.z > compareTo.z;
 		}
 
 		@Override
@@ -235,9 +234,9 @@ public enum BlockSide
 		}
 		
 		@Override
-		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		public boolean isMoreExtremal( Coords compareWith, Coords compareTo )
 		{
-			return compareWith.posX < compareTo.posX;
+			return compareWith.x < compareTo.x;
 		}
 
 		@Override
@@ -280,9 +279,9 @@ public enum BlockSide
 		}
 		
 		@Override
-		public boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo )
+		public boolean isMoreExtremal( Coords compareWith, Coords compareTo )
 		{
-			return compareWith.posX > compareTo.posX;
+			return compareWith.x > compareTo.x;
 		}
 
 		@Override
@@ -403,7 +402,7 @@ public enum BlockSide
 	public abstract int getHeight( int dx, int dy, int dz );
 	public abstract int getU( int x, int y, int z );
 	public abstract int getV( int x, int y, int z );
-	public abstract boolean isMoreExtremal( ChunkCoordinates compareWith, ChunkCoordinates compareTo );
+	public abstract boolean isMoreExtremal( Coords compareWith, Coords compareTo );
 	public abstract double getFractionSubmerged( int y, double waterHeight );
 	
 	public static BlockSide[] xzSides( )

@@ -12,9 +12,7 @@ package cuchaz.modsShared.blocks;
 
 import java.util.TreeMap;
 
-import net.minecraft.util.ChunkCoordinates;
-
-public class BlockMap<T> extends TreeMap<ChunkCoordinates,T>
+public class BlockMap<T> extends TreeMap<Coords,T>
 {
 	private static final long serialVersionUID = 283133229158446376L;
 	

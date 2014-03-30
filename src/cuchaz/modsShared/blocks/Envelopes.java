@@ -15,14 +15,12 @@ import java.util.Set;
 import java.util.TreeMap;
 
 
-import net.minecraft.util.ChunkCoordinates;
-
 public class Envelopes
 {
 	private Map<BlockSide,BlockArray> m_envelopes;
 	private BoundingBoxInt m_boundingBox;
 	
-	public Envelopes( Set<ChunkCoordinates> blocks )
+	public Envelopes( Set<Coords> blocks )
 	{
 		m_boundingBox = new BoundingBoxInt( blocks );
 		
@@ -47,14 +45,14 @@ public class Envelopes
 		}
 		
 		// compute the envelopes
-		for( ChunkCoordinates coords : blocks )
+		for( Coords coords : blocks )
 		{
 			for( BlockSide side : BlockSide.values() )
 			{
 				BlockArray surface = m_envelopes.get( side );
-				int u = side.getU( coords.posX, coords.posY, coords.posZ );
-				int v = side.getV( coords.posX, coords.posY, coords.posZ );
-				ChunkCoordinates extremalCoords = surface.getBlock( u, v );
+				int u = side.getU( coords.x, coords.y, coords.z );
+				int v = side.getV( coords.x, coords.y, coords.z );
+				Coords extremalCoords = surface.getBlock( u, v );
 				if( extremalCoords == null || side.isMoreExtremal( coords, extremalCoords ) )
 				{
 					surface.setBlock( u, v, coords );

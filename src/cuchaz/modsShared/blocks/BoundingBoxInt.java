@@ -13,7 +13,6 @@ package cuchaz.modsShared.blocks;
 import java.util.Set;
 
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChunkCoordinates;
 
 public class BoundingBoxInt
 {
@@ -34,12 +33,12 @@ public class BoundingBoxInt
 		maxZ = Integer.MIN_VALUE;
 	}
 	
-	public BoundingBoxInt( Set<ChunkCoordinates> blocks )
+	public BoundingBoxInt( Set<Coords> blocks )
 	{
 		this();
-		for( ChunkCoordinates coords : blocks )
+		for( Coords coords : blocks )
 		{
-			expandBoxToInclude( coords.posX, coords.posY, coords.posZ );
+			expandBoxToInclude( coords.x, coords.y, coords.z );
 		}
 	}
 	
@@ -80,9 +79,9 @@ public class BoundingBoxInt
 		return maxZ - minZ + 1;
 	}
 	
-	public boolean containsPoint( ChunkCoordinates coords )
+	public boolean containsPoint( Coords coords )
 	{
-		return containsPoint( coords.posX, coords.posY, coords.posZ );
+		return containsPoint( coords.x, coords.y, coords.z );
 	}
 	
 	public boolean containsPoint( int x, int y, int z )

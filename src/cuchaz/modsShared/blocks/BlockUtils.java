@@ -22,7 +22,6 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -44,12 +43,12 @@ public class BlockUtils
 			}
 			
 			@Override
-			public void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i )
+			public void getNeighbor( Coords out, Coords in, int i )
 			{
 				BlockSide side = BlockSide.values()[i];
-				out.posX = in.posX + side.getDx();
-				out.posY = in.posY + side.getDy();
-				out.posZ = in.posZ + side.getDz();
+				out.x = in.x + side.getDx();
+				out.y = in.y + side.getDy();
+				out.z = in.z + side.getDz();
 			}
 		},
 		Edges
@@ -65,7 +64,7 @@ public class BlockUtils
 			}
 			
 			@Override
-			public void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i )
+			public void getNeighbor( Coords out, Coords in, int i )
 			{
 				if( i < Faces.getNumNeighbors() )
 				{
@@ -74,9 +73,9 @@ public class BlockUtils
 				else
 				{
 					i -= Faces.getNumNeighbors();
-					out.posX = in.posX + dx[i];
-					out.posY = in.posY + dy[i];
-					out.posZ = in.posZ + dz[i];
+					out.x = in.x + dx[i];
+					out.y = in.y + dy[i];
+					out.z = in.z + dz[i];
 				}
 			}
 		},
@@ -93,7 +92,7 @@ public class BlockUtils
 			}
 			
 			@Override
-			public void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i )
+			public void getNeighbor( Coords out, Coords in, int i )
 			{
 				if( i < Edges.getNumNeighbors() )
 				{
@@ -102,15 +101,15 @@ public class BlockUtils
 				else
 				{
 					i -= Edges.getNumNeighbors();
-					out.posX = in.posX + dx[i];
-					out.posY = in.posY + dy[i];
-					out.posZ = in.posZ + dz[i];
+					out.x = in.x + dx[i];
+					out.y = in.y + dy[i];
+					out.z = in.z + dz[i];
 				}
 			}
 		};
 		
 		public abstract int getNumNeighbors( );
-		public abstract void getNeighbor( ChunkCoordinates out, ChunkCoordinates in, int i );
+		public abstract void getNeighbor( Coords out, Coords in, int i );
 	}
 	
 	public static enum UpdateRules
@@ -148,17 +147,17 @@ public class BlockUtils
 
 	public static interface BlockExplorer
 	{
-		public boolean shouldExploreBlock( ChunkCoordinates coords );
+		public boolean shouldExploreBlock( Coords coords );
 	}
 	
 	public static interface BlockCallback
 	{
-		public SearchAction foundBlock( ChunkCoordinates coords );
+		public SearchAction foundBlock( Coords coords );
 	}
 	
 	public static interface BlockConditionChecker
 	{
-		public boolean isConditionMet( ChunkCoordinates coords );
+		public boolean isConditionMet( Coords coords );
 	}
 	
 	private static Field m_chunkPrecipitationHeightMapField;
@@ -200,19 +199,19 @@ public class BlockUtils
 		}
 	}
 	
-	public static int getManhattanDistance( ChunkCoordinates a, ChunkCoordinates b )
+	public static int getManhattanDistance( Coords a, Coords b )
 	{
-		return getManhattanDistance( a.posX, a.posY, a.posZ, b.posX, b.posY, b.posZ );
+		return getManhattanDistance( a.x, a.y, a.z, b.x, b.y, b.z );
 	}
 	
-	public static int getManhattanDistance( int ax, int ay, int az, ChunkCoordinates b )
+	public static int getManhattanDistance( int ax, int ay, int az, Coords b )
 	{
-		return getManhattanDistance( ax, ay, az, b.posX, b.posY, b.posZ );
+		return getManhattanDistance( ax, ay, az, b.x, b.y, b.z );
 	}
 	
-	public static int getManhattanDistance( ChunkCoordinates a, int bx, int by, int bz )
+	public static int getManhattanDistance( Coords a, int bx, int by, int bz )
 	{
-		return getManhattanDistance( a.posX, a.posY, a.posZ, bx, by, bz );
+		return getManhattanDistance( a.x, a.y, a.z, bx, by, bz );
 	}
 	
 	public static int getManhattanDistance( int ax, int ay, int az, int bx, int by, int bz )
@@ -220,19 +219,19 @@ public class BlockUtils
 		return Math.abs( ax - bx ) + Math.abs( ay - by ) + Math.abs( az - bz );
 	}
 	
-	public static int getXZManhattanDistance( ChunkCoordinates a, ChunkCoordinates b )
+	public static int getXZManhattanDistance( Coords a, Coords b )
 	{
-		return getXZManhattanDistance( a.posX, a.posY, a.posZ, b.posX, b.posY, b.posZ );
+		return getXZManhattanDistance( a.x, a.y, a.z, b.x, b.y, b.z );
 	}
 	
-	public static int getXZManhattanDistance( int ax, int ay, int az,  ChunkCoordinates b )
+	public static int getXZManhattanDistance( int ax, int ay, int az,  Coords b )
 	{
-		return getXZManhattanDistance( ax, ay, az, b.posX, b.posY, b.posZ );
+		return getXZManhattanDistance( ax, ay, az, b.x, b.y, b.z );
 	}
 	
-	public static int getXZManhattanDistance( ChunkCoordinates a, int bx, int by, int bz )
+	public static int getXZManhattanDistance( Coords a, int bx, int by, int bz )
 	{
-		return getXZManhattanDistance( a.posX, a.posY, a.posZ, bx, by, bz );
+		return getXZManhattanDistance( a.x, a.y, a.z, bx, by, bz );
 	}
 	
 	public static int getXZManhattanDistance( int ax, int ay, int az, int bx, int by, int bz )
@@ -242,10 +241,10 @@ public class BlockUtils
 	
 	public static BlockSet searchForBlocks( int x, int y, int z, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
 	{
-		return searchForBlocks( new ChunkCoordinates( x, y, z ), maxNumBlocks, explorer, neighbors );
+		return searchForBlocks( new Coords( x, y, z ), maxNumBlocks, explorer, neighbors );
 	}
 	
-	public static BlockSet searchForBlocks( final ChunkCoordinates source, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
+	public static BlockSet searchForBlocks( final Coords source, int maxNumBlocks, BlockExplorer explorer, Neighbors neighbors )
 	{
 		final BlockSet foundBlocks = new BlockSet();
 		exploreBlocks(
@@ -254,7 +253,7 @@ public class BlockUtils
 			new BlockCallback( )
 			{
 				@Override
-				public SearchAction foundBlock( ChunkCoordinates coords )
+				public SearchAction foundBlock( Coords coords )
 				{
 					if( !coords.equals( source ) )
 					{
@@ -271,29 +270,29 @@ public class BlockUtils
 	
 	public static Boolean searchForCondition( int x, int y, int z, int maxNumBlocks, BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
 	{
-		return searchForCondition( new ChunkCoordinates( x, y, z ), maxNumBlocks, checker, explorer, neighbors );
+		return searchForCondition( new Coords( x, y, z ), maxNumBlocks, checker, explorer, neighbors );
 	}
 	
-	public static Boolean searchForCondition( ChunkCoordinates source, int maxNumBlocks, final BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
+	public static Boolean searchForCondition( Coords source, int maxNumBlocks, final BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
 	{
 		return searchForBlock( source, maxNumBlocks, checker, explorer, neighbors ) != null;
 	}
 	
-	public static ChunkCoordinates searchForBlock( int x, int y, int z, int maxNumBlocks, BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
+	public static Coords searchForBlock( int x, int y, int z, int maxNumBlocks, BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
 	{
-		return searchForBlock( new ChunkCoordinates( x, y, z ), maxNumBlocks, checker, explorer, neighbors );
+		return searchForBlock( new Coords( x, y, z ), maxNumBlocks, checker, explorer, neighbors );
 	}
 	
-	public static ChunkCoordinates searchForBlock( final ChunkCoordinates source, int maxNumBlocks, final BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
+	public static Coords searchForBlock( final Coords source, int maxNumBlocks, final BlockConditionChecker checker, BlockExplorer explorer, Neighbors neighbors )
 	{
-		final ChunkCoordinates[] outCoords = { null };
+		final Coords[] outCoords = { null };
 		exploreBlocks(
 			source,
 			maxNumBlocks,
 			new BlockCallback( )
 			{
 				@Override
-				public SearchAction foundBlock( ChunkCoordinates coords )
+				public SearchAction foundBlock( Coords coords )
 				{
 					// is this our target block?
 					if( !coords.equals( source ) && checker.isConditionMet( coords ) )
@@ -311,19 +310,19 @@ public class BlockUtils
 		return outCoords[0];
 	}
 	
-	public static void exploreBlocks( ChunkCoordinates source, int maxNumBlocks, BlockCallback callback, BlockExplorer explorer, Neighbors neighbors )
+	public static void exploreBlocks( Coords source, int maxNumBlocks, BlockCallback callback, BlockExplorer explorer, Neighbors neighbors )
 	{
 		// TEMP
 		Profiler.start( "exploreBlocks" );
 		
-		Deque<ChunkCoordinates> queue = new ArrayDeque<ChunkCoordinates>();
+		Deque<Coords> queue = new ArrayDeque<Coords>();
 		BlockSet visitedBlocks = new BlockSet();
 		
 		// do BFS to find valid blocks starting at the source block
 		queue.add( source );
 		visitedBlocks.add( source );
 		
-		ChunkCoordinates neighborCoords = new ChunkCoordinates( 0, 0, 0 );
+		Coords neighborCoords = new Coords( 0, 0, 0 );
 		while( !queue.isEmpty() )
 		{
 			// check the cap
@@ -333,7 +332,7 @@ public class BlockUtils
 			}
 			
 			// get the next block
-			ChunkCoordinates coords = queue.poll();
+			Coords coords = queue.poll();
 			
 			// report the block
 			if( callback.foundBlock( coords ) == SearchAction.AbortSearch )
@@ -349,7 +348,7 @@ public class BlockUtils
 				{
 					if( explorer.shouldExploreBlock( neighborCoords ) )
 					{
-						ChunkCoordinates coordsToAdd = new ChunkCoordinates( neighborCoords );
+						Coords coordsToAdd = new Coords( neighborCoords );
 						visitedBlocks.add( coordsToAdd );
 						queue.add( coordsToAdd );
 					}
@@ -368,7 +367,7 @@ public class BlockUtils
 		while( !remainingBlocks.isEmpty() )
 		{
 			// get a block
-			ChunkCoordinates coords = remainingBlocks.first();
+			Coords coords = remainingBlocks.first();
 			
 			// do BFS from this block to find the connected component
 			BlockSet component = new BlockSet( BlockUtils.searchForBlocks(
@@ -377,7 +376,7 @@ public class BlockUtils
 				new BlockExplorer( )
 				{
 					@Override
-					public boolean shouldExploreBlock( ChunkCoordinates coords )
+					public boolean shouldExploreBlock( Coords coords )
 					{
 						return remainingBlocks.contains( coords );
 					}
@@ -399,9 +398,9 @@ public class BlockUtils
 		// UNDONE: this could be optimized if we could answer y= queries efficiently
 		
 		BlockSet outBlocks = new BlockSet();
-		for( ChunkCoordinates coords : inBlocks )
+		for( Coords coords : inBlocks )
 		{
-			if( coords.posY <= y )
+			if( coords.y <= y )
 			{
 				outBlocks.add( coords );
 			}
@@ -421,16 +420,16 @@ public class BlockUtils
 		int volume = box.getVolume();
 		
 		// use BFS to find the enclosed blocks (including the boundary)
-		ChunkCoordinates sourceBlock = innerBoundary.iterator().next();
+		Coords sourceBlock = innerBoundary.iterator().next();
 		BlockSet holeBlocks = BlockUtils.searchForBlocks(
 			sourceBlock,
 			volume,
 			new BlockExplorer( )
 			{
 				@Override
-				public boolean shouldExploreBlock( ChunkCoordinates coords )
+				public boolean shouldExploreBlock( Coords coords )
 				{
-					return !blocks.contains( coords ) && ( yMax == null || coords.posY <= yMax );
+					return !blocks.contains( coords ) && ( yMax == null || coords.y <= yMax );
 				}
 			},
 			neighbors
@@ -595,7 +594,7 @@ public class BlockUtils
         }
 	}
 	
-	public static void worldRangeQuery( Collection<ChunkCoordinates> out, World world, AxisAlignedBB queryBox )
+	public static void worldRangeQuery( Collection<Coords> out, World world, AxisAlignedBB queryBox )
 	{
 		int minX = MathHelper.floor_double( queryBox.minX );
         int maxX = MathHelper.floor_double( queryBox.maxX );
@@ -611,7 +610,7 @@ public class BlockUtils
                 {
                     if( world.getBlockId( x, y, z ) != 0 )
                     {
-                        out.add( new ChunkCoordinates( x, y, z ) );
+                        out.add( new Coords( x, y, z ) );
                     }
                 }
             }
