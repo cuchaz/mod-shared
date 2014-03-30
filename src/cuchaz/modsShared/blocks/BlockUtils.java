@@ -367,7 +367,7 @@ public class BlockUtils
 		while( !remainingBlocks.isEmpty() )
 		{
 			// get a block
-			Coords coords = remainingBlocks.first();
+			Coords coords = remainingBlocks.iterator().next();
 			
 			// do BFS from this block to find the connected component
 			BlockSet component = new BlockSet( BlockUtils.searchForBlocks(
@@ -615,5 +615,48 @@ public class BlockUtils
                 }
             }
         }
+	}
+	
+	public static boolean isConnectedToShell( Coords coords, final BlockSet blocks, Neighbors neighbors )
+	{
+		return isConnectedToShell( coords, blocks, neighbors, null );
+	}
+	
+	public static boolean isConnectedToShell( Coords coords, final BlockSet blocks, Neighbors neighbors, final Integer maxY )
+	{
+		// don't check more blocks than can fit in the shell
+		final BoundingBoxInt box = blocks.getBoundingBox();
+		int shellVolume = ( box.getDx() + 2 )*( box.getDy() + 2 )*( box.getDz() + 2 );
+		
+		Boolean result = BlockUtils.searchForCondition(
+			coords,
+			shellVolume,
+			new BlockConditionChecker( )
+			{
+				@Override
+				public boolean isConditionMet( Coords coords )
+				{
+					// is this a shell block?
+					return !box.containsPoint( coords );
+				}
+			},
+			new BlockExplorer( )
+			{
+				@Override
+				public boolean shouldExploreBlock( Coords coords )
+				{
+					return ( maxY == null || coords.y <= maxY ) && !blocks.contains( coords );
+				}
+			},
+			neighbors
+		);
+		
+		// just in case...
+		if( result == null )
+		{
+			throw new Error( "We evaluated too many blocks checking for the shell. This shouldn't have happened." );
+		}
+		
+		return result;
 	}
 }

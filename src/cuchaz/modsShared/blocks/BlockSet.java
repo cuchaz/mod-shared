@@ -11,9 +11,9 @@
 package cuchaz.modsShared.blocks;
 
 import java.util.Collection;
-import java.util.TreeSet;
+import java.util.HashSet;
 
-public class BlockSet extends TreeSet<Coords>
+public class BlockSet extends HashSet<Coords>
 {
 	private static final long serialVersionUID = -1018340715197554750L;
 	

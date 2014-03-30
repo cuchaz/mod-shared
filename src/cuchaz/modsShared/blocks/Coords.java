@@ -52,6 +52,9 @@ public class Coords implements Comparable<Coords>
 	{
 		// NOTE: ChunkCoordinates hashCode is broken, that's mostly why we need this class
 		// so the damn hash data structures can work properly!
+		// it might be an error from the decompiler, or possibly in the original source. I'll never know.
+		// also, emperical testing shows that HashSet<Coords> are slightly faster than TreeSet<Coords>,
+		// so this class is also an optimization over ChunkCoordinates
 		return x + ( y << 8 ) + ( z << 16 );
 	}
 	

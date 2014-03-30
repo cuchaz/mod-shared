@@ -10,9 +10,9 @@
  ******************************************************************************/
 package cuchaz.modsShared.blocks;
 
-import java.util.TreeMap;
+import java.util.HashMap;
 
-public class BlockMap<T> extends TreeMap<Coords,T>
+public class BlockMap<T> extends HashMap<Coords,T>
 {
 	private static final long serialVersionUID = 283133229158446376L;
 	
