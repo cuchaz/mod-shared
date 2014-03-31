@@ -28,7 +28,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import cuchaz.modsShared.Environment;
 import cuchaz.modsShared.Log;
-import cuchaz.modsShared.perf.Profiler;
 
 public class BlockUtils
 {
@@ -312,9 +311,6 @@ public class BlockUtils
 	
 	public static void exploreBlocks( Coords source, int maxNumBlocks, BlockCallback callback, BlockExplorer explorer, Neighbors neighbors )
 	{
-		// TEMP
-		Profiler.start( "exploreBlocks" );
-		
 		Deque<Coords> queue = new ArrayDeque<Coords>();
 		BlockSet visitedBlocks = new BlockSet();
 		
@@ -355,9 +351,6 @@ public class BlockUtils
 				}
 			}
 		}
-		
-		// TEMP
-		Profiler.stop( "exploreBlocks" );
 	}
 	
 	public static List<BlockSet> getConnectedComponents( BlockSet blocks, Neighbors neighbors )
