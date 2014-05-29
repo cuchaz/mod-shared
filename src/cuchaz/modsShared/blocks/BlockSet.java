@@ -93,6 +93,7 @@ public class BlockSet extends HashSet<Coords>
 				}
 				buf.append( '\n' );
 			}
+			buf.append( '\n' );
 		}
 		return buf.toString();
 	}

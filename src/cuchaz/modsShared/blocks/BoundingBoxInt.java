@@ -105,4 +105,14 @@ public class BoundingBoxInt
 		out.maxY = maxY;
 		out.maxZ = maxZ;
 	}
+	
+	@Override
+	public String toString( )
+	{
+		return String.format( "[%d,%d]x[%d,%d]x[%d,%d]",
+			minX, maxX,
+			minY, maxY,
+			minZ, maxZ
+		);
+	}
 }

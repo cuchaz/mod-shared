@@ -401,12 +401,35 @@ public class BlockUtils
 		return outBlocks;
 	}
 	
+	public static BlockSet getBoundary( BlockSet blocks, Neighbors neighbors )
+	{
+		BlockSet boundary = new BlockSet();
+		Coords neighborCoords = new Coords( 0, 0, 0 );
+		for( Coords coords : blocks )
+		{
+			for( int i=0; i<neighbors.getNumNeighbors(); i++ )
+			{
+				neighbors.getNeighbor( neighborCoords, coords, i );
+				if( !blocks.contains( neighborCoords ) )
+				{
+					boundary.add( new Coords( neighborCoords ) );
+				}
+			}
+		}
+		return boundary;
+	}
+	
 	public static BlockSet getHoleFromInnerBoundary( BlockSet innerBoundary, final BlockSet blocks, Neighbors neighbors )
 	{
-		return getHoleFromInnerBoundary( innerBoundary, blocks, neighbors, null );
+		return getHoleFromInnerBoundary( innerBoundary, blocks, neighbors, null, null );
 	}
 	
 	public static BlockSet getHoleFromInnerBoundary( BlockSet innerBoundary, final BlockSet blocks, Neighbors neighbors, final Integer yMax )
+	{
+		return getHoleFromInnerBoundary( innerBoundary, blocks, neighbors, null, yMax );
+	}
+	
+	public static BlockSet getHoleFromInnerBoundary( BlockSet innerBoundary, final BlockSet blocks, Neighbors neighbors, final Integer yMin, final Integer yMax )
 	{
 		// get the number of blocks inside the shell to use as an upper bound
 		BoundingBoxInt box = new BoundingBoxInt( blocks );
@@ -422,7 +445,7 @@ public class BlockUtils
 				@Override
 				public boolean shouldExploreBlock( Coords coords )
 				{
-					return !blocks.contains( coords ) && ( yMax == null || coords.y <= yMax );
+					return !blocks.contains( coords ) && ( yMin == null || coords.y >= yMin ) && ( yMax == null || coords.y <= yMax );
 				}
 			},
 			neighbors

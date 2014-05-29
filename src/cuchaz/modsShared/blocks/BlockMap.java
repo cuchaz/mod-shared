@@ -16,5 +16,15 @@ public class BlockMap<T> extends HashMap<Coords,T>
 {
 	private static final long serialVersionUID = 283133229158446376L;
 	
-	// nothing to do
+	private BlockSetProxy m_proxy;
+	
+	public BlockMap( )
+	{
+		m_proxy = new BlockSetProxy( keySet() );
+	}
+	
+	public BlockSet blockSet( )
+	{
+		return m_proxy;
+	}
 }
