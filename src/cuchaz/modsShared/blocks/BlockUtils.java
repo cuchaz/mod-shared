@@ -551,6 +551,7 @@ public class BlockUtils
 				m_chunkRelightBlockMethod.invoke( chunk, mx, y, mz );
 			}
 			m_chunkPropagateSkylightOcclusionMethod.invoke( chunk, mx, mz );
+			world.updateAllLightTypes(x, y, z);
 			
 			// make the chunk dirty
 			m_chunkIsModifiedField.setBoolean( chunk, true );
