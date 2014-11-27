@@ -613,6 +613,11 @@ public class BlockUtils
 	
 	public static void worldRangeQuery( Collection<Coords> out, World world, AxisAlignedBB queryBox )
 	{
+		worldRangeQuery( out, world, queryBox, false );
+	}
+	
+	public static void worldRangeQuery( Collection<Coords> out, World world, AxisAlignedBB queryBox, boolean includeAir )
+	{
 		int minX = MathHelper.floor_double( queryBox.minX );
         int maxX = MathHelper.floor_double( queryBox.maxX );
         int minY = MathHelper.floor_double( queryBox.minY );
@@ -625,7 +630,7 @@ public class BlockUtils
             {
                 for( int y=minY; y<=maxY; y++ )
                 {
-                    if( world.getBlockId( x, y, z ) != 0 )
+                    if( includeAir || world.getBlockId( x, y, z ) != 0 )
                     {
                         out.add( new Coords( x, y, z ) );
                     }
