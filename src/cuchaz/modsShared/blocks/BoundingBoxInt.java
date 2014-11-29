@@ -101,9 +101,9 @@ public class BoundingBoxInt
 		out.minX = minX;
 		out.minY = minY;
 		out.minZ = minZ;
-		out.maxX = maxX;
-		out.maxY = maxY;
-		out.maxZ = maxZ;
+		out.maxX = maxX + 1;
+		out.maxY = maxY + 1;
+		out.maxZ = maxZ + 1;
 	}
 	
 	@Override
