@@ -11,18 +11,10 @@
 package cuchaz.modsShared;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.server.ServerListenThread;
-import net.minecraft.server.ThreadMinecraftServer;
 
 
 public class Environment
 {
-	public static enum Side
-	{
-		Client,
-		Server;
-	}
-	
 	private static Boolean m_isObfuscated;
 	
 	static
@@ -58,33 +50,5 @@ public class Environment
 	public static String getRuntimeName( String name, String id )
 	{
 		return isObfuscated() ? id : name;
-	}
-	
-	public static Side getSide( )
-	{
-		if( isServer() )
-		{
-			return Side.Server;
-		}
-		else
-		{
-			return Side.Client;
-		}
-	}
-	
-	public static boolean isServer( )
-	{
-		// if we only had to worry about standalone clients and servers, then this would be easy to check
-		// we just look for a client-only class. If it exists, then we're on the client
-		// except for in single-player mode (ie, in dev), both client and server exist in the same process
-		// but they're in different threads.
-		// so the best way to check for client/server is to check our thread
-		Thread thread = Thread.currentThread();
-        return thread instanceof ThreadMinecraftServer || thread instanceof ServerListenThread;
-	}
-	
-	public static boolean isClient( )
-	{
-		return !isServer();
 	}
 }

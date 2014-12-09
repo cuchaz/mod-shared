@@ -10,6 +10,8 @@
  ******************************************************************************/
 package cuchaz.modsShared;
 
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,9 +28,9 @@ public class EntityUtils
 			throw new IllegalArgumentException( "player cannot be null!" );
 		}
 		
-		return player.worldObj.getWorldVec3Pool().getVecFromPool(
+		return Vec3.createVectorHelper(
 			player.posX,
-			player.posY + ( Environment.isClient() ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight() ),
+			player.posY + ( FMLLaunchHandler.side() == Side.CLIENT ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight() ),
 			player.posZ
 		);
 	}
@@ -48,7 +50,7 @@ public class EntityUtils
 		float cosPitch = MathHelper.cos( -pitch );
 		float sinPitch = MathHelper.sin( -pitch );
 		
-		return player.worldObj.getWorldVec3Pool().getVecFromPool(
+		return Vec3.createVectorHelper(
 			sinYaw * -cosPitch,
 			sinPitch,
 			cosYaw * -cosPitch

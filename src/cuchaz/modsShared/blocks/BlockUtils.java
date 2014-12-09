@@ -20,6 +20,7 @@ import java.util.Deque;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -480,6 +481,8 @@ public class BlockUtils
 	{
 		// NOTE: this method emulates Chunk.setBlockIDWithMetadata()
 		
+		// TODO: update for 1.7.10
+		
 		try
 		{
 			// get the masked coords
@@ -601,7 +604,7 @@ public class BlockUtils
             {
                 for( int y=minY; y<=maxY; y++ )
                 {
-                    Block block = Block.blocksList[world.getBlockId( x, y, z )];
+                	Block block = world.getBlock( x, y, z );
                     if( block != null )
                     {
                         block.addCollisionBoxesToList( world, x, y, z, queryBox, out, null );
@@ -630,7 +633,7 @@ public class BlockUtils
             {
                 for( int y=minY; y<=maxY; y++ )
                 {
-                    if( includeAir || world.getBlockId( x, y, z ) != 0 )
+                    if( includeAir || world.getBlock( x, y, z ) != Blocks.air )
                     {
                         out.add( new Coords( x, y, z ) );
                     }

@@ -10,12 +10,12 @@
  ******************************************************************************/
 package cuchaz.modsShared.blocks;
 
-import cuchaz.modsShared.math.BoxCorner;
-import cuchaz.modsShared.math.CircleRange;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
+import cuchaz.modsShared.math.BoxCorner;
+import cuchaz.modsShared.math.CircleRange;
 
 public enum BlockSide
 {
@@ -24,7 +24,7 @@ public enum BlockSide
 	Bottom( 0, -1, 0, new BoxCorner[] { BoxCorner.BottomNorthEast, BoxCorner.BottomNorthWest, BoxCorner.BottomSouthWest, BoxCorner.BottomSouthEast } )
 	{
 		@Override
-		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, IIcon icon )
 		{
 			renderBlocks.renderFaceYNeg( block, (double)x, (double)y, (double)z, icon );
 		}
@@ -69,7 +69,7 @@ public enum BlockSide
 	Top( 0, 1, 0, new BoxCorner[] { BoxCorner.TopNorthEast, BoxCorner.TopNorthWest, BoxCorner.TopSouthWest, BoxCorner.TopSouthEast } )
 	{
 		@Override
-		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, IIcon icon )
 		{
 			renderBlocks.renderFaceYPos( block, (double)x, (double)y, (double)z, icon );
 		}
@@ -114,7 +114,7 @@ public enum BlockSide
 	North( 0, 0, -1, new BoxCorner[] { BoxCorner.TopNorthWest, BoxCorner.TopNorthEast, BoxCorner.BottomNorthEast, BoxCorner.BottomNorthWest } )
 	{
 		@Override
-		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, IIcon icon )
 		{
 			renderBlocks.renderFaceZNeg( block, (double)x, (double)y, (double)z, icon );
 		}
@@ -159,7 +159,7 @@ public enum BlockSide
 	South( 0, 0, 1, new BoxCorner[] { BoxCorner.TopSouthEast, BoxCorner.TopSouthWest, BoxCorner.BottomSouthWest, BoxCorner.BottomSouthEast } )
 	{
 		@Override
-		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, IIcon icon )
 		{
 			renderBlocks.renderFaceZPos( block, (double)x, (double)y, (double)z, icon );
 		}
@@ -204,7 +204,7 @@ public enum BlockSide
 	West( -1, 0, 0, new BoxCorner[] { BoxCorner.TopSouthWest, BoxCorner.TopNorthWest, BoxCorner.BottomNorthWest, BoxCorner.BottomSouthWest } )
 	{
 		@Override
-		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, IIcon icon )
 		{
 			renderBlocks.renderFaceXNeg( block, (double)x, (double)y, (double)z, icon );
 		}
@@ -249,7 +249,7 @@ public enum BlockSide
 	East( 1, 0, 0, new BoxCorner[] { BoxCorner.TopNorthEast, BoxCorner.TopSouthEast, BoxCorner.BottomSouthEast, BoxCorner.BottomNorthEast } )
 	{
 		@Override
-		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon )
+		public void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, IIcon icon )
 		{
 			renderBlocks.renderFaceXPos( block, (double)x, (double)y, (double)z, icon );
 		}
@@ -397,7 +397,7 @@ public enum BlockSide
 		return m_xzSides[offset];
 	}
 	
-	public abstract void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, Icon icon );
+	public abstract void renderSide( RenderBlocks renderBlocks, Block block, double x, double y, double z, IIcon icon );
 	public abstract int getWidth( int dx, int dy, int dz );
 	public abstract int getHeight( int dx, int dy, int dz );
 	public abstract int getU( int x, int y, int z );
