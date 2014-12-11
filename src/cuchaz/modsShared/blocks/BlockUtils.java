@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -560,7 +562,7 @@ public class BlockUtils
 			m_chunkIsModifiedField.setBoolean( chunk, true );
 			
 			// handle block updates
-			if( updateRules.shouldUpdateNeighbors() && Environment.isServer() )
+			if( updateRules.shouldUpdateNeighbors() && FMLLaunchHandler.side() == Side.SERVER )
 			{
                 world.notifyBlockChange( x, y, z, oldBlockId );
 			}
