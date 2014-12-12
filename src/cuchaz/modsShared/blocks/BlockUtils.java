@@ -471,15 +471,15 @@ public class BlockUtils
 	
 	public static boolean removeBlockWithoutNotifyingIt( World world, int x, int y, int z, UpdateRules updateRules )
 	{
-		return changeBlockWithoutNotifyingIt( world, x, y, z, 0, 0, updateRules );
+		return changeBlockWithoutNotifyingIt( world, x, y, z, Blocks.air, 0, updateRules );
 	}
 	
-	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta )
+	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, Block targetBlock, int targetBlockMeta )
 	{
-		return changeBlockWithoutNotifyingIt( world, x, y, z, targetBlockId, targetBlockMeta, UpdateRules.UpdateNeighborsAndClients );
+		return changeBlockWithoutNotifyingIt( world, x, y, z, targetBlock, targetBlockMeta, UpdateRules.UpdateNeighborsAndClients );
 	}
 	
-	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, int targetBlockId, int targetBlockMeta, UpdateRules updateRules )
+	public static boolean changeBlockWithoutNotifyingIt( World world, int x, int y, int z, Block targetBlock, int targetBlockMeta, UpdateRules updateRules )
 	{
 		// NOTE: this method emulates Chunk.setBlockIDWithMetadata()
 		
@@ -496,13 +496,13 @@ public class BlockUtils
 			Chunk chunk = world.getChunkFromBlockCoords( x, z );
 			
 			// if the block didn't change, bail
-			int oldBlockId = chunk.getBlockID( mx, y, mz );
+			Block oldBlock = chunk.getBlock( mx, y, mz );
 			int oldBlockMeta = chunk.getBlockMetadata( mx, y, mz );
-			if( oldBlockId == targetBlockId )
+			if( oldBlock == targetBlock )
 			{
 				if( oldBlockMeta != targetBlockMeta )
 				{
-					Log.logger.warning( String.format( "Ignoring block metadata change for block %d at (%d,%d,%d)", oldBlockId, x, y, z ) );
+					Log.logger.warning( String.format( "Ignoring block metadata change for block %s at (%d,%d,%d)", oldBlock.getUnlocalizedName(), x, y, z ) );
 				}
 				return false;
 			}
@@ -522,14 +522,14 @@ public class BlockUtils
 			int height = heightMap[heightMapIndex];
 			
 			// clean up any tile entities
-			if( oldBlockId != 0 && Block.blocksList[oldBlockId] != null && Block.blocksList[oldBlockId].hasTileEntity( oldBlockMeta ) )
+			if( oldBlock != Blocks.air && oldBlock.hasTileEntity( oldBlockMeta ) )
 			{
 				// remove it from the chunk
-				TileEntity tileEntity = chunk.getChunkBlockTileEntity( mx, y, mz );
+				TileEntity tileEntity = chunk.getTileEntityUnsafe( mx, y, mz );
 				if( tileEntity != null )
 				{
 					tileEntity.invalidate();
-					chunk.removeChunkBlockTileEntity( mx, y, mz );
+					chunk.removeTileEntity( mx, y, mz );
 				}
 			}
 			
@@ -540,11 +540,11 @@ public class BlockUtils
 				extendedblockstorage = new ExtendedBlockStorage( y >> 4 << 4, !world.provider.hasNoSky );
 				storageArrays[y >> 4] = extendedblockstorage;
 			}
-			extendedblockstorage.setExtBlockID( mx, my, mz, targetBlockId );
+			extendedblockstorage.func_150818_a( mx, my, mz, targetBlock );
 			extendedblockstorage.setExtBlockMetadata( mx, my, mz, targetBlockMeta );
 			
 			// update lighting
-			if( chunk.getBlockLightOpacity( mx, y, mz ) > 0 )
+			if( chunk.func_150808_b( mx, y, mz ) > 0 ) // getBlockLightOpacity()
 			{
 				if( y >= height )
 				{
@@ -556,7 +556,7 @@ public class BlockUtils
 				m_chunkRelightBlockMethod.invoke( chunk, mx, y, mz );
 			}
 			m_chunkPropagateSkylightOcclusionMethod.invoke( chunk, mx, mz );
-			world.updateAllLightTypes(x, y, z);
+			world.func_147451_t( x, y, z ); // updateAllLightTypes()
 			
 			// make the chunk dirty
 			m_chunkIsModifiedField.setBoolean( chunk, true );
@@ -564,7 +564,7 @@ public class BlockUtils
 			// handle block updates
 			if( updateRules.shouldUpdateNeighbors() && FMLLaunchHandler.side() == Side.SERVER )
 			{
-                world.notifyBlockChange( x, y, z, oldBlockId );
+                world.notifyBlockChange( x, y, z, oldBlock );
 			}
 			if( updateRules.shouldUpdateClients() )
 			{
