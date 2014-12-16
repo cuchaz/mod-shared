@@ -98,7 +98,17 @@ public class FMLHacker
 			}
 			else if( url.getProtocol().equalsIgnoreCase( "file" ) )
 			{
-				return new File( url.toURI() ).getParentFile();
+				// get the file of the mod container
+				File file = new File( url.toURI() );
+				
+				// the file will look something like /path/to/folder/bin/package/package/Mod.class
+				// for resource loading, we want just the /path/to/folder/bin part
+				int numPackageComponents = c.getPackage().getName().split("\\.").length;
+				for( int i=0; i<=numPackageComponents; i++ )
+				{
+					file = file.getParentFile();
+				}
+				return file;
 			}
 			else
 			{
