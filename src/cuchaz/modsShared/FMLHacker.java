@@ -16,7 +16,9 @@ import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import cpw.mods.fml.common.InjectedModContainer;
@@ -74,6 +76,35 @@ public class FMLHacker
 			if( modObjectListField.get( modController ) != null )
 			{
 				modObjectListField.set( modController, modController.buildModObjectList() );
+			}
+			
+			// look through namedMods too: Loader.private Map<String, ModContainer> namedMods;
+			Field namedModsField = Loader.class.getDeclaredField( "namedMods" );
+			namedModsField.setAccessible( true );
+			wrapperContainer = null;
+			@SuppressWarnings( "unchecked" )
+			Map<String,ModContainer> namedMods = new HashMap<String,ModContainer>( (Map<String,ModContainer>)namedModsField.get( Loader.instance() ) );
+			for( Map.Entry<String,ModContainer> entry : namedMods.entrySet() )
+			{
+				ModContainer modContainer = entry.getValue();
+				if( modContainer instanceof InjectedModContainer )
+				{
+					InjectedModContainer container = (InjectedModContainer)modContainer;
+					if( container.wrappedContainer == target )
+					{
+						wrapperContainer = container;
+						entry.setValue( container.wrappedContainer );
+					}
+				}
+			}
+			if( wrapperContainer == null )
+			{
+				throw new IllegalArgumentException( "Unable to find target mod container!" );
+			}
+			else
+			{
+				// replace the old namedMods since it's immutable
+				namedModsField.set( Loader.instance(), namedMods );
 			}
 		}
 		catch( Exception ex )
