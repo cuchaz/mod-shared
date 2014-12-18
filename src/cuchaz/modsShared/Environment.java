@@ -11,6 +11,7 @@
 package cuchaz.modsShared;
 
 import net.minecraft.entity.Entity;
+import cpw.mods.fml.relauncher.Side;
 
 
 public class Environment
@@ -50,5 +51,34 @@ public class Environment
 	public static String getRuntimeName( String name, String id )
 	{
 		return isObfuscated() ? id : name;
+	}
+	
+	public static Side getSide( )
+	{
+		// which thread are we on?
+		// looks like the best way to tell is to ask which thread we're in
+		String threadName = Thread.currentThread().getName();
+		if( threadName.equalsIgnoreCase( "client thread" ) )
+		{
+			return Side.CLIENT;
+		}
+		else if( threadName.equalsIgnoreCase( "server thread" ) )
+		{
+			return Side.SERVER;
+		}
+		else
+		{
+			throw new Error( "I don't know what side we're on for thread " + threadName );
+		}
+	}
+	
+	public static boolean isClient( )
+	{
+		return getSide() == Side.CLIENT;
+	}
+	
+	public static boolean isServer( )
+	{
+		return getSide() == Side.SERVER;
 	}
 }

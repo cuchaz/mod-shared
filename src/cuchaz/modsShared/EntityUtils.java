@@ -10,8 +10,6 @@
  ******************************************************************************/
 package cuchaz.modsShared;
 
-import cpw.mods.fml.relauncher.FMLLaunchHandler;
-import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,7 +28,7 @@ public class EntityUtils
 		
 		return Vec3.createVectorHelper(
 			player.posX,
-			player.posY + ( FMLLaunchHandler.side() == Side.CLIENT ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight() ),
+			player.posY + ( Environment.isClient() ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight() ),
 			player.posZ
 		);
 	}
