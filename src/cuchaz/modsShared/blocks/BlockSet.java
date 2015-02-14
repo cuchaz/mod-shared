@@ -13,56 +13,46 @@ package cuchaz.modsShared.blocks;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class BlockSet extends HashSet<Coords>
-{
+public class BlockSet extends HashSet<Coords> {
+	
 	private static final long serialVersionUID = -1018340715197554750L;
 	
-	public BlockSet( )
-	{
+	public BlockSet() {
 		super();
 	}
 	
-	public BlockSet( BlockSet other )
-	{
-		super( other );
+	public BlockSet(BlockSet other) {
+		super(other);
 	}
 	
-	public BlockSet( Collection<Coords> blocks )
-	{
+	public BlockSet(Collection<Coords> blocks) {
 		super();
-		addAll( blocks );
+		addAll(blocks);
 	}
 	
-	public BlockSet( int numLayers, char blockChar, String ... lines )
-	{
-		this( numLayers, blockChar, 0, 0, 0, lines );
+	public BlockSet(int numLayers, char blockChar, String... lines) {
+		this(numLayers, blockChar, 0, 0, 0, lines);
 	}
 	
-	public BlockSet( int numLayers, int ox, int oy, int oz, String ... lines )
-	{
-		this( numLayers, 'x', ox, oy, oz, lines );
+	public BlockSet(int numLayers, int ox, int oy, int oz, String... lines) {
+		this(numLayers, 'x', ox, oy, oz, lines);
 	}
 	
-	public BlockSet( int layerSize, char blockChar, int ox, int oy, int oz, String ... lines )
-	{
+	public BlockSet(int layerSize, char blockChar, int ox, int oy, int oz, String... lines) {
 		int y = 0;
 		int z = 0;
-		for( String line : lines )
-		{
-			for( int x=0; x<line.length(); x++ )
-			{
-				char c = line.charAt( x );
-				if( c == blockChar )
-				{
+		for (String line : lines) {
+			for (int x = 0; x < line.length(); x++) {
+				char c = line.charAt(x);
+				if (c == blockChar) {
 					// add the block
-					add( new Coords( ox + x, oy + y, oz + z ) );
+					add(new Coords(ox + x, oy + y, oz + z));
 				}
 			}
 			
 			// advance the pointer
 			z++;
-			if( z % layerSize == 0 )
-			{
+			if (z % layerSize == 0) {
 				z = 0;
 				y++;
 			}
@@ -70,36 +60,28 @@ public class BlockSet extends HashSet<Coords>
 	}
 	
 	@Override
-	public String toString( )
-	{
+	public String toString() {
 		StringBuilder buf = new StringBuilder();
 		BoundingBoxInt box = getBoundingBox();
 		Coords coords = new Coords();
-		for( int y=box.minY; y<=box.maxY; y++ )
-		{
-			for( int z=box.minZ; z<=box.maxZ; z++ )
-			{
-				for( int x=box.minX; x<=box.maxX; x++ )
-				{
-					coords.set( x, y, z );
-					if( contains( coords ) )
-					{
-						buf.append( 'x' );
-					}
-					else
-					{
-						buf.append( '.' );
+		for (int y = box.minY; y <= box.maxY; y++) {
+			for (int z = box.minZ; z <= box.maxZ; z++) {
+				for (int x = box.minX; x <= box.maxX; x++) {
+					coords.set(x, y, z);
+					if (contains(coords)) {
+						buf.append('x');
+					} else {
+						buf.append('.');
 					}
 				}
-				buf.append( '\n' );
+				buf.append('\n');
 			}
-			buf.append( '\n' );
+			buf.append('\n');
 		}
 		return buf.toString();
 	}
 	
-	public BoundingBoxInt getBoundingBox( )
-	{
-		return new BoundingBoxInt( this );
+	public BoundingBoxInt getBoundingBox() {
+		return new BoundingBoxInt(this);
 	}
 }

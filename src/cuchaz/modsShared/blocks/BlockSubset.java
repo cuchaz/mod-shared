@@ -10,20 +10,17 @@
  ******************************************************************************/
 package cuchaz.modsShared.blocks;
 
-
-public class BlockSubset extends BlockSet
-{
+public class BlockSubset extends BlockSet {
+	
 	private static final long serialVersionUID = 4665021537648940014L;
 	
 	BlockSet m_parent;
 	
-	public BlockSubset( BlockSet parent )
-	{
+	public BlockSubset(BlockSet parent) {
 		m_parent = parent;
 	}
 	
-	public BlockSet getParent( )
-	{
+	public BlockSet getParent() {
 		return m_parent;
 	}
 }

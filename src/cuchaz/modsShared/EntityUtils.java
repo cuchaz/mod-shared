@@ -17,56 +17,40 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
-public class EntityUtils
-{
-	public static Vec3 getPlayerEyePos( EntityPlayer player )
-	{
-		if( player == null )
-		{
-			throw new IllegalArgumentException( "player cannot be null!" );
+public class EntityUtils {
+	
+	public static Vec3 getPlayerEyePos(EntityPlayer player) {
+		if (player == null) {
+			throw new IllegalArgumentException("player cannot be null!");
 		}
 		
-		return Vec3.createVectorHelper(
-			player.posX,
-			player.posY + ( Environment.isClient() ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight() ),
-			player.posZ
-		);
+		return Vec3.createVectorHelper(player.posX, player.posY + (Environment.isClient() ? player.getEyeHeight() - player.getDefaultEyeHeight() : player.getEyeHeight()), player.posZ);
 	}
 	
-	public static Vec3 getPlayerLookDirection( EntityPlayer player )
-	{
-		if( player == null )
-		{
-			throw new IllegalArgumentException( "player cannot be null!" );
+	public static Vec3 getPlayerLookDirection(EntityPlayer player) {
+		if (player == null) {
+			throw new IllegalArgumentException("player cannot be null!");
 		}
 		
 		final double toRadians = Math.PI / 180.0;
-		float pitch = (float)( player.rotationPitch * toRadians );
-		float yaw = (float)( player.rotationYaw * toRadians );
-		float cosYaw = MathHelper.cos( -yaw - (float)Math.PI );
-		float sinYaw = MathHelper.sin( -yaw - (float)Math.PI );
-		float cosPitch = MathHelper.cos( -pitch );
-		float sinPitch = MathHelper.sin( -pitch );
+		float pitch = (float) (player.rotationPitch * toRadians);
+		float yaw = (float) (player.rotationYaw * toRadians);
+		float cosYaw = MathHelper.cos(-yaw - (float)Math.PI);
+		float sinYaw = MathHelper.sin(-yaw - (float)Math.PI);
+		float cosPitch = MathHelper.cos(-pitch);
+		float sinPitch = MathHelper.sin(-pitch);
 		
-		return Vec3.createVectorHelper(
-			sinYaw * -cosPitch,
-			sinPitch,
-			cosYaw * -cosPitch
-		);
+		return Vec3.createVectorHelper(sinYaw * -cosPitch, sinPitch, cosYaw * -cosPitch);
 	}
 	
-	public static double getPlayerReachDistance( EntityPlayer player )
-	{
-		if( player instanceof EntityPlayerMP )
-		{
+	public static double getPlayerReachDistance(EntityPlayer player) {
+		if (player instanceof EntityPlayerMP) {
 			return ((EntityPlayerMP)player).theItemInWorldManager.getBlockReachDistance();
-		}
-		else if( player instanceof AbstractClientPlayer )
-		{
+		} else if (player instanceof AbstractClientPlayer) {
 			return Minecraft.getMinecraft().playerController.getBlockReachDistance();
 		}
 		
-		Log.logger.warning( "Unable to determine reach distance for player!" );
+		Log.logger.warning("Unable to determine reach distance for player!");
 		return 0;
 	}
 }

@@ -13,40 +13,33 @@ package cuchaz.modsShared.blocks;
 import java.util.Map;
 import java.util.TreeMap;
 
-
-public class BlockSetHeightIndex
-{
+public class BlockSetHeightIndex {
+	
 	private Map<Integer,BlockSet> m_layers;
 	
-	public BlockSetHeightIndex()
-	{
+	public BlockSetHeightIndex() {
 		m_layers = new TreeMap<Integer,BlockSet>();
 	}
 	
-	public BlockSetHeightIndex( BlockSet blocks )
-	{
+	public BlockSetHeightIndex(BlockSet blocks) {
 		this();
-		add( blocks );
+		add(blocks);
 	}
 	
-	public void add( BlockSet blocks )
-	{
-		for( Coords coords : blocks )
-		{
+	public void add(BlockSet blocks) {
+		for (Coords coords : blocks) {
 			// is there a layer at this y yet?
-			BlockSet layer = m_layers.get( coords.y );
-			if( layer == null )
-			{
+			BlockSet layer = m_layers.get(coords.y);
+			if (layer == null) {
 				layer = new BlockSet();
-				m_layers.put( coords.y, layer );
+				m_layers.put(coords.y, layer);
 			}
 			
-			layer.add( coords );
+			layer.add(coords);
 		}
 	}
 	
-	public BlockSet get( int y )
-	{
-		return m_layers.get( y );
+	public BlockSet get(int y) {
+		return m_layers.get(y);
 	}
 }

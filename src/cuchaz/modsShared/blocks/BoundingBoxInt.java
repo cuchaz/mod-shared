@@ -14,8 +14,8 @@ import java.util.Set;
 
 import net.minecraft.util.AxisAlignedBB;
 
-public class BoundingBoxInt
-{
+public class BoundingBoxInt {
+	
 	public int minX;
 	public int maxX;
 	public int minY;
@@ -23,8 +23,7 @@ public class BoundingBoxInt
 	public int minZ;
 	public int maxZ;
 	
-	public BoundingBoxInt( )
-	{
+	public BoundingBoxInt() {
 		minX = Integer.MAX_VALUE;
 		maxX = Integer.MIN_VALUE;
 		minY = Integer.MAX_VALUE;
@@ -33,17 +32,14 @@ public class BoundingBoxInt
 		maxZ = Integer.MIN_VALUE;
 	}
 	
-	public BoundingBoxInt( Set<Coords> blocks )
-	{
+	public BoundingBoxInt(Set<Coords> blocks) {
 		this();
-		for( Coords coords : blocks )
-		{
-			expandBoxToInclude( coords.x, coords.y, coords.z );
+		for (Coords coords : blocks) {
+			expandBoxToInclude(coords.x, coords.y, coords.z);
 		}
 	}
 	
-	public BoundingBoxInt( BoundingBoxInt other )
-	{
+	public BoundingBoxInt(BoundingBoxInt other) {
 		minX = other.minX;
 		minY = other.minY;
 		minZ = other.minZ;
@@ -51,53 +47,43 @@ public class BoundingBoxInt
 		maxY = other.maxY;
 		maxZ = other.maxZ;
 	}
-
-	public void expandBoxToInclude( int x, int y, int z )
-	{
-		minX = Math.min( minX, x );
-		maxX = Math.max( maxX, x );
+	
+	public void expandBoxToInclude(int x, int y, int z) {
+		minX = Math.min(minX, x);
+		maxX = Math.max(maxX, x);
 		
-		minY = Math.min( minY, y );
-		maxY = Math.max( maxY, y );
+		minY = Math.min(minY, y);
+		maxY = Math.max(maxY, y);
 		
-		minZ = Math.min( minZ, z );
-		maxZ = Math.max( maxZ, z );
+		minZ = Math.min(minZ, z);
+		maxZ = Math.max(maxZ, z);
 	}
 	
-	public int getDx( )
-	{
+	public int getDx() {
 		return maxX - minX + 1;
 	}
 	
-	public int getDy( )
-	{
+	public int getDy() {
 		return maxY - minY + 1;
 	}
 	
-	public int getDz( )
-	{
+	public int getDz() {
 		return maxZ - minZ + 1;
 	}
 	
-	public boolean containsPoint( Coords coords )
-	{
-		return containsPoint( coords.x, coords.y, coords.z );
+	public boolean containsPoint(Coords coords) {
+		return containsPoint(coords.x, coords.y, coords.z);
 	}
 	
-	public boolean containsPoint( int x, int y, int z )
-	{
-		return x >= minX && x <= maxX
-			&& y >= minY && y <= maxY
-			&& z >= minZ && z <= maxZ;
+	public boolean containsPoint(int x, int y, int z) {
+		return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
 	}
 	
-	public int getVolume( )
-	{
-		return getDx()*getDy()*getDz();
+	public int getVolume() {
+		return getDx() * getDy() * getDz();
 	}
 	
-	public void toAxisAlignedBB( AxisAlignedBB out )
-	{
+	public void toAxisAlignedBB(AxisAlignedBB out) {
 		out.minX = minX;
 		out.minY = minY;
 		out.minZ = minZ;
@@ -107,12 +93,7 @@ public class BoundingBoxInt
 	}
 	
 	@Override
-	public String toString( )
-	{
-		return String.format( "[%d,%d]x[%d,%d]x[%d,%d]",
-			minX, maxX,
-			minY, maxY,
-			minZ, maxZ
-		);
+	public String toString() {
+		return String.format("[%d,%d]x[%d,%d]x[%d,%d]", minX, maxX, minY, maxY, minZ, maxZ);
 	}
 }

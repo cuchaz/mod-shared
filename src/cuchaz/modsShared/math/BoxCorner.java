@@ -13,88 +13,79 @@ package cuchaz.modsShared.math;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 
-public enum BoxCorner
-{
-	BottomNorthEast
-	{
+public enum BoxCorner {
+	BottomNorthEast {
+		
 		@Override
-		public void getPoint( Vec3 out, AxisAlignedBB box )
-		{
+		public void getPoint(Vec3 out, AxisAlignedBB box) {
 			out.xCoord = box.maxX;
 			out.yCoord = box.minY;
 			out.zCoord = box.maxZ;
 		}
 	},
-	BottomNorthWest
-	{
+	BottomNorthWest {
+		
 		@Override
-		public void getPoint( Vec3 out, AxisAlignedBB box )
-		{
+		public void getPoint(Vec3 out, AxisAlignedBB box) {
 			out.xCoord = box.maxX;
 			out.yCoord = box.minY;
 			out.zCoord = box.minZ;
 		}
 	},
-	BottomSouthWest
-	{
+	BottomSouthWest {
+		
 		@Override
-		public void getPoint( Vec3 out, AxisAlignedBB box )
-		{
+		public void getPoint(Vec3 out, AxisAlignedBB box) {
 			out.xCoord = box.minX;
 			out.yCoord = box.minY;
 			out.zCoord = box.minZ;
 		}
 	},
-	BottomSouthEast
-	{
+	BottomSouthEast {
+		
 		@Override
-		public void getPoint( Vec3 out, AxisAlignedBB box )
-		{
+		public void getPoint(Vec3 out, AxisAlignedBB box) {
 			out.xCoord = box.minX;
 			out.yCoord = box.minY;
 			out.zCoord = box.maxZ;
 		}
 	},
-	TopNorthEast
-	{
+	TopNorthEast {
+		
 		@Override
-		public void getPoint( Vec3 out, AxisAlignedBB box )
-		{
+		public void getPoint(Vec3 out, AxisAlignedBB box) {
 			out.xCoord = box.maxX;
 			out.yCoord = box.maxY;
 			out.zCoord = box.maxZ;
 		}
 	},
-	TopNorthWest
-	{
+	TopNorthWest {
+		
 		@Override
-		public void getPoint( Vec3 out, AxisAlignedBB box )
-		{
+		public void getPoint(Vec3 out, AxisAlignedBB box) {
 			out.xCoord = box.maxX;
 			out.yCoord = box.maxY;
 			out.zCoord = box.minZ;
 		}
 	},
-	TopSouthWest
-	{
+	TopSouthWest {
+		
 		@Override
-		public void getPoint( Vec3 out, AxisAlignedBB box )
-		{
+		public void getPoint(Vec3 out, AxisAlignedBB box) {
 			out.xCoord = box.minX;
 			out.yCoord = box.maxY;
 			out.zCoord = box.minZ;
 		}
 	},
-	TopSouthEast
-	{
+	TopSouthEast {
+		
 		@Override
-		public void getPoint( Vec3 out, AxisAlignedBB box )
-		{
+		public void getPoint(Vec3 out, AxisAlignedBB box) {
 			out.xCoord = box.minX;
 			out.yCoord = box.maxY;
 			out.zCoord = box.maxZ;
 		}
 	};
 	
-	public abstract void getPoint( Vec3 out, AxisAlignedBB box );
+	public abstract void getPoint(Vec3 out, AxisAlignedBB box);
 }

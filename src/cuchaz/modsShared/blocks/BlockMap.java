@@ -12,19 +12,17 @@ package cuchaz.modsShared.blocks;
 
 import java.util.HashMap;
 
-public class BlockMap<T> extends HashMap<Coords,T>
-{
+public class BlockMap<T> extends HashMap<Coords,T> {
+	
 	private static final long serialVersionUID = 283133229158446376L;
 	
 	private BlockSetProxy m_proxy;
 	
-	public BlockMap( )
-	{
-		m_proxy = new BlockSetProxy( keySet() );
+	public BlockMap() {
+		m_proxy = new BlockSetProxy(keySet());
 	}
 	
-	public BlockSet blockSet( )
-	{
+	public BlockSet blockSet() {
 		return m_proxy;
 	}
 }

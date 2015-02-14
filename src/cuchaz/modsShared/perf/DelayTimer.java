@@ -10,20 +10,18 @@
  ******************************************************************************/
 package cuchaz.modsShared.perf;
 
-public class DelayTimer
-{
+public class DelayTimer {
+	
 	private int m_numTicks;
 	private int m_timer;
 	
-	public DelayTimer( int numTicks )
-	{
+	public DelayTimer(int numTicks) {
 		m_numTicks = numTicks;
 		m_timer = 0;
 	}
 	
-	public boolean isDelayedUpdate( )
-	{
-		m_timer = ( m_timer + 1 ) % m_numTicks;
+	public boolean isDelayedUpdate() {
+		m_timer = (m_timer + 1) % m_numTicks;
 		return m_timer == 0;
 	}
 }
