@@ -386,6 +386,11 @@ public class BlockUtils {
 	public static boolean changeBlockWithoutNotifyingIt(World world, int x, int y, int z, Block targetBlock, int targetBlockMeta, UpdateRules updateRules) {
 		// NOTE: this method emulates Chunk.setBlockIDWithMetadata()
 		
+		// just in case, don't exceed the world bounds
+		if (y < 0 || y >= world.getActualHeight()) {
+			return false;
+		}
+		
 		// TODO: update for 1.7.10
 		
 		try {
@@ -506,6 +511,11 @@ public class BlockUtils {
 		int maxY = MathHelper.floor_double(queryBox.maxY);
 		int minZ = MathHelper.floor_double(queryBox.minZ);
 		int maxZ = MathHelper.floor_double(queryBox.maxZ);
+		
+		// make sure we don't exceed the world y bounds
+		minY = Math.max(minY, 0);
+		maxY = Math.min(maxY, world.getActualHeight());
+		
 		for (int x = minX; x <= maxX; x++) {
 			for (int z = minZ; z <= maxZ; z++) {
 				for (int y = minY; y <= maxY; y++) {
